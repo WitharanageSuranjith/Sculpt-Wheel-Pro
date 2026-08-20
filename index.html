@@ -657,8 +657,8 @@
     .how-section { background: #0b0b0c; }
     .how-section .section-head { align-items: end; }
     .how-section .section-head h2 span { color: var(--orange); }
-    .how-steps { position: relative; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; }
-    .how-steps::before { content: ""; position: absolute; top: 45px; left: calc(12.5% + 16px); right: calc(12.5% + 16px); z-index: 0; height: 1px; background: repeating-linear-gradient(90deg,rgba(255,101,20,.62) 0 8px,transparent 8px 14px); }
+    .how-steps { position: relative; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
+    .how-steps::before { content: ""; position: absolute; top: 45px; left: calc(16.666% + 18px); right: calc(16.666% + 18px); z-index: 0; height: 1px; background: repeating-linear-gradient(90deg,rgba(255,101,20,.62) 0 8px,transparent 8px 14px); }
     .how-step { position: relative; z-index: 1; display: flex; min-width: 0; min-height: 430px; flex-direction: column; padding: 30px 26px 26px; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; background: linear-gradient(180deg,#141415 0%,#101011 100%); box-shadow: inset 0 1px rgba(255,255,255,.025); }
     .how-step-copy { display: flex; flex: 1; flex-direction: column; }
     .how-step-num { display: grid; width: 32px; height: 32px; margin-bottom: 22px; place-items: center; border: 1px solid rgba(255,101,20,.75); border-radius: 50%; color: var(--orange); background: #141415; box-shadow: 0 0 0 7px #141415; font: 700 9px/1 "CG Geist Mono", monospace; letter-spacing: .04em; }
@@ -680,10 +680,6 @@
     footer { position: relative; display: flex; justify-content: space-between; gap: 20px; padding: 26px 0 36px; color: var(--muted); font-size: 12px; }
     footer::before { content: ""; position: absolute; top: 0; left: 50%; width: 100vw; height: 1px; background: var(--line); transform: translateX(-50%); }
     .mono { font-family: "CG Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
-    @media (max-width: 1100px) and (min-width: 861px) {
-      .how-steps { grid-template-columns: repeat(2,minmax(0,1fr)); }
-      .how-steps::before { display: none; }
-    }
     @media (max-width: 860px) {
       .hero, .gallery { grid-template-columns: 1fr; }
       .hero-copy, .hero > .visual { grid-column: 1; grid-row: auto; }
@@ -1008,24 +1004,20 @@
     <section class="section how-section" id="how">
       <div class="wrap">
         <div class="section-head">
-          <div><div class="eyebrow">How it works</div><h2>Buy. Download. Activate. <span>Start sculpting.</span></h2></div>
-          <p>Four clear steps take Sculpt-Wheel from a Superhive purchase to a licensed, Blender-native brush workflow.</p>
+          <div><div class="eyebrow">How it works</div><h2>Install. Activate. <span>Start sculpting.</span></h2></div>
+          <p>Three clear steps take Sculpt-Wheel from a downloaded ZIP to a licensed, Blender-native brush workflow.</p>
         </div>
         <div class="how-steps">
           <article class="how-step">
-            <div class="how-step-copy"><span class="how-step-num">01</span><h3>Purchase and download.</h3><p>Complete your Sculpt-Wheel payment through Superhive. After checkout, download the add-on ZIP and keep your receipt or order ID ready.</p></div>
-            <div class="how-step-visual" aria-hidden="true"><div class="how-ui"><div class="how-ui-head"><strong>Superhive order</strong><span>Purchase complete</span></div><div class="how-ui-row active"><span>Order ID&nbsp; SW-ORDER-XXXX</span><span class="how-ui-status">Paid</span></div><div class="how-ui-row"><span class="how-ui-code">Sculpt-Wheel-1.0.010.zip</span><span class="how-ui-action">Download</span></div></div></div>
-          </article>
-          <article class="how-step">
-            <div class="how-step-copy"><span class="how-step-num">02</span><h3>Install the add-on.</h3><p>In Blender 4.3 or newer, open Edit &gt; Preferences &gt; Get Extensions. Choose Install from Disk, select the ZIP without extracting it, then enable the add-on.</p></div>
+            <div class="how-step-copy"><span class="how-step-num">01</span><h3>Install the add-on.</h3><p>In Blender 4.3 or newer, open Edit &gt; Preferences &gt; Get Extensions. Choose Install from Disk, select the Sculpt-Wheel ZIP without extracting it, then enable the add-on.</p></div>
             <div class="how-step-visual" aria-hidden="true"><div class="how-ui"><div class="how-ui-head"><strong>Blender Preferences</strong><span>Get Extensions</span></div><div class="how-ui-row"><span>Install from Disk</span><span class="how-ui-chip">Choose ZIP</span></div><div class="how-ui-row active"><span class="how-ui-code">Sculpt-Wheel-1.0.010.zip</span><span class="how-ui-action">Install</span></div></div></div>
           </article>
           <article class="how-step">
-            <div class="how-step-copy"><span class="how-step-num">03</span><h3>Request your activation key.</h3><p>Copy the Machine Code from Sculpt-Wheel's preferences, then send it with your Superhive receipt or order ID through the Superhive Inbox.</p></div>
+            <div class="how-step-copy"><span class="how-step-num">02</span><h3>Request your activation key.</h3><p>Copy the Machine Code from Sculpt-Wheel's preferences, then send it with your Superhive receipt or order ID through the Superhive Inbox.</p></div>
             <div class="how-step-visual" aria-hidden="true"><div class="how-ui"><div class="how-ui-head"><strong>License request</strong><span>Superhive Inbox</span></div><div class="how-ui-row active"><span class="how-ui-code">Machine Code&nbsp; SW-MACHINE-XXXX-XXXX</span><span class="how-ui-action">Copy</span></div><div class="how-ui-row"><span>Receipt / Order ID</span><span class="how-ui-chip">Attach</span></div></div></div>
           </article>
           <article class="how-step">
-            <div class="how-step-copy"><span class="how-step-num">04</span><h3>Activate and start sculpting.</h3><p>Paste the returned key and press Activate. Verification runs offline; enter Sculpt Mode and press Space whenever you need the wheel.</p></div>
+            <div class="how-step-copy"><span class="how-step-num">03</span><h3>Activate and start sculpting.</h3><p>Paste the returned key and press Activate. Verification runs offline; enter Sculpt Mode and press Space whenever you need the wheel.</p></div>
             <div class="how-step-visual" aria-hidden="true"><div class="how-ui"><div class="how-ui-head"><strong>Sculpt-Wheel License</strong><span class="how-ui-status">Offline ready</span></div><div class="how-ui-row active"><span class="how-ui-code">SW4-XXXXX-XXXXX-XXXXX</span><span class="how-ui-action">Activate</span></div><div class="how-ui-row"><span>Open in Sculpt Mode</span><span class="how-key">Space</span></div></div></div>
           </article>
         </div>
