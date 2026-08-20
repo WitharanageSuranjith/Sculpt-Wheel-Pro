@@ -677,6 +677,12 @@
     .how-ui-status { display: inline-flex; align-items: center; gap: 6px; color: #cbd0d4; font: 600 9px/1 "CG Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
     .how-ui-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 9px rgba(255,101,20,.6); }
     .how-key { display: inline-grid; min-width: 42px; height: 32px; place-items: center; border: 1px solid #4a4e53; border-radius: 5px; color: #fff; background: #27292d; font: 700 11px/1 "CG Geist Mono", monospace; box-shadow: inset 0 -2px #151619; }
+    .payment-card { display: flex; align-items: center; justify-content: space-between; gap: 30px; padding: 28px 32px; border: 1px solid var(--line); border-radius: 11px; background: #111113; }
+    .payment-card h2 { max-width: 560px; font-size: clamp(25px,2.5vw,34px); }
+    .payment-card p { max-width: 540px; margin: 10px 0 0; color: var(--muted); font-size: 13px; }
+    .payment-options { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 9px; }
+    .payment-option { display: inline-flex; min-width: 108px; min-height: 42px; align-items: center; justify-content: center; padding: 0 14px; border: 1px solid rgba(255,101,20,.62); border-radius: 6px; color: #fff; background: rgba(255,101,20,.08); font-size: 12px; font-weight: 600; transition: background .16s ease, border-color .16s ease, transform .16s ease; }
+    .payment-option:hover { border-color: var(--orange); background: var(--orange); color: #111; transform: translateY(-1px); }
     footer { position: relative; display: flex; justify-content: space-between; gap: 20px; padding: 26px 0 36px; color: var(--muted); font-size: 12px; }
     footer::before { content: ""; position: absolute; top: 0; left: 50%; width: 100vw; height: 1px; background: var(--line); transform: translateX(-50%); }
     .mono { font-family: "CG Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -712,6 +718,8 @@
       .nav-links { display: none; }
       .section { padding: 72px 0; }
       .how-step { padding: 28px 24px 24px; }
+      .payment-card { display: block; padding: 28px 24px; }
+      .payment-options { justify-content: flex-start; margin-top: 22px; }
       footer { display: block; }
       footer span { display: block; margin-top: 8px; }
       .zb-left-shelf { grid-template-columns: 1fr; }
@@ -1020,6 +1028,23 @@
             <div class="how-step-copy"><span class="how-step-num">03</span><h3>Activate and start sculpting.</h3><p>Paste the returned key and press Activate. Verification runs offline; enter Sculpt Mode and press Space whenever you need the wheel.</p></div>
             <div class="how-step-visual" aria-hidden="true"><div class="how-ui"><div class="how-ui-head"><strong>Sculpt-Wheel License</strong><span class="how-ui-status">Offline ready</span></div><div class="how-ui-row active"><span class="how-ui-code">SW4-XXXXX-XXXXX-XXXXX</span><span class="how-ui-action">Activate</span></div><div class="how-ui-row"><span>Open in Sculpt Mode</span><span class="how-key">Space</span></div></div></div>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section payment-section" aria-label="Payment providers">
+      <div class="wrap">
+        <div class="payment-card">
+          <div>
+            <div class="eyebrow">Choose your checkout</div>
+            <h2>Pay through the store <span>you already use.</span></h2>
+            <p>Choose a provider below to purchase Sculpt-Wheel and download the add-on.</p>
+          </div>
+          <div class="payment-options">
+            <a class="payment-option" href="https://superhivemarket.com" target="_blank" rel="noopener">Superhive <span>&nbsp;↗</span></a>
+            <a class="payment-option" href="https://gumroad.com" target="_blank" rel="noopener">Gumroad <span>&nbsp;↗</span></a>
+            <a class="payment-option" href="https://www.artstation.com" target="_blank" rel="noopener">ArtStation <span>&nbsp;↗</span></a>
+          </div>
         </div>
       </div>
     </section>
