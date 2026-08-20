@@ -688,15 +688,16 @@
     .payment-provider p { margin: 8px 0 20px; color: var(--muted); font-size: 12px; line-height: 1.5; }
     .payment-option { display: inline-flex; width: fit-content; min-height: 34px; align-items: center; justify-content: center; margin-top: auto; padding: 0 12px; border: 1px solid rgba(255,101,20,.62); border-radius: 5px; color: #fff; background: rgba(255,101,20,.08); font-size: 11px; font-weight: 600; transition: background .16s ease, border-color .16s ease, transform .16s ease; }
     .payment-option:hover { border-color: var(--orange); background: var(--orange); color: #111; transform: translateY(-1px); }
-    .checkout-rail { display: grid; grid-template-columns: minmax(260px,.72fr) minmax(0,1.28fr); align-items: center; gap: 42px; padding: 34px 38px; border-top: 1px solid rgba(255,255,255,.16); border-bottom: 1px solid rgba(255,255,255,.16); background: linear-gradient(90deg,rgba(255,101,20,.06),transparent 52%); }
-    .checkout-rail h2 { max-width: 440px; font-size: clamp(27px,2.8vw,38px); }
-    .checkout-rail p { max-width: 400px; margin: 10px 0 0; color: var(--muted); font-size: 13px; }
-    .checkout-links { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; }
-    .checkout-link { display: flex; min-height: 94px; flex-direction: column; justify-content: space-between; padding: 14px; border: 1px solid var(--line); border-radius: 7px; background: #121214; transition: border-color .16s ease, background .16s ease, transform .16s ease; }
+    .checkout-picker { text-align: center; }
+    .checkout-picker .eyebrow { margin-bottom: 13px; }
+    .checkout-picker h2 { margin: 0 auto; font-size: clamp(28px,3vw,40px); }
+    .checkout-picker p { max-width: 540px; margin: 12px auto 0; color: var(--muted); font-size: 13px; }
+    .checkout-links { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; max-width: 820px; margin: 30px auto 0; }
+    .checkout-link { display: flex; min-height: 68px; align-items: center; gap: 14px; padding: 0 18px; border: 1px solid var(--line); border-radius: 8px; text-align: left; background: #111113; transition: border-color .16s ease, background .16s ease, transform .16s ease; }
     .checkout-link:hover { border-color: rgba(255,101,20,.7); background: rgba(255,101,20,.08); transform: translateY(-2px); }
     .checkout-link small { color: var(--orange); font: 700 9px/1 "CG Geist Mono", monospace; letter-spacing: .12em; }
-    .checkout-link strong { color: #f7f5f1; font-size: 15px; }
-    .checkout-link span { color: #a9adb1; font: 10px/1 "CG Geist Mono", monospace; }
+    .checkout-link strong { flex: 1; color: #f7f5f1; font-size: 14px; }
+    .checkout-link span { color: var(--orange); font: 11px/1 "CG Geist Mono", monospace; }
     .compat-card { display: grid; grid-template-columns: minmax(0,1.08fr) minmax(360px,.92fr); align-items: center; gap: 48px; padding: 42px 56px; border: 1px solid rgba(255,101,20,.42); border-radius: 18px; background: linear-gradient(110deg,rgba(73,39,24,.34),rgba(21,23,27,.96) 58%); box-shadow: inset 0 1px rgba(255,255,255,.04); }
     .compat-eyebrow { display: flex; align-items: center; gap: 9px; margin-bottom: 17px; color: var(--orange); font: 700 11px/1 "CG Geist Mono", monospace; letter-spacing: .19em; text-transform: uppercase; }
     .compat-eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 10px rgba(255,101,20,.75); }
@@ -748,7 +749,6 @@
       .section { padding: 72px 0; }
       .how-step { padding: 28px 24px 24px; }
       .payment-grid { grid-template-columns: 1fr; }
-      .checkout-rail { grid-template-columns: 1fr; gap: 24px; padding: 28px 24px; }
       .checkout-links { grid-template-columns: 1fr; }
       .compat-card { grid-template-columns: 1fr; gap: 28px; padding: 32px 24px; }
       footer { display: block; }
@@ -1015,8 +1015,8 @@
    
     <section class="section payment-section" aria-label="Payment providers">
       <div class="wrap">
-        <div class="checkout-rail">
-          <div><div class="eyebrow">Choose your checkout</div><h2>Pick a store. <span>Get sculpting.</span></h2><p>Purchase Sculpt-Wheel from the provider you already use, then download the Blender add-on.</p></div>
+        <div class="checkout-picker">
+          <div class="eyebrow">Choose your checkout</div><h2>Pick a store. <span>Get sculpting.</span></h2><p>Purchase Sculpt-Wheel from the provider you already use, then download the Blender add-on.</p>
           <div class="checkout-links">
             <a class="checkout-link" href="https://superhivemarket.com" target="_blank" rel="noopener"><small>01</small><strong>Superhive</strong><span>Purchase &amp; download ↗</span></a>
             <a class="checkout-link" href="https://gumroad.com" target="_blank" rel="noopener"><small>02</small><strong>Gumroad</strong><span>Purchase &amp; download ↗</span></a>
