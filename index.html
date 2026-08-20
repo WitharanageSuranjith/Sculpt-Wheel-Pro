@@ -1,0 +1,1639 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0a0a0b" />
+  <meta name="description" content="Sculpt-Wheel is a fast radial brush workflow for Blender sculptors." />
+  <title>Sculpt-Wheel | One gesture away</title>
+  <link rel="icon" type="image/png" href="assets/icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    const resetPageScroll = () => {
+      const root = document.documentElement;
+      const previousBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = 'auto';
+      window.scrollTo(0, 0);
+      root.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+      root.style.scrollBehavior = previousBehavior;
+    };
+    resetPageScroll();
+    document.addEventListener('DOMContentLoaded', resetPageScroll, { once: true });
+    window.addEventListener('load', () => {
+      resetPageScroll();
+      requestAnimationFrame(() => requestAnimationFrame(resetPageScroll));
+      setTimeout(resetPageScroll, 80);
+    }, { once: true });
+    window.addEventListener('pageshow', resetPageScroll);
+  </script>
+  <style>
+    @font-face { font-family: "CG Geist"; src: url("assets/fonts/GeistVF.woff") format("woff"); font-style: normal; font-weight: 100 900; font-display: swap; }
+    @font-face { font-family: "CG Geist Mono"; src: url("assets/fonts/GeistMonoVF.woff") format("woff"); font-style: normal; font-weight: 100 900; font-display: swap; }
+    :root {
+      --bg: #09090a;
+      --surface: #111113;
+      --surface-2: #171719;
+      --line: rgba(255,255,255,.12);
+      --text: #f7f5f1;
+      --muted: #a5a3a0;
+      --orange: #ff6514;
+      --orange-soft: #ff9a5e;
+      --green: #b7d79d;
+      --max: 1180px;
+    }
+    * { box-sizing: border-box; }
+    html { max-width: 100%; overflow-x: clip; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: #55585c #0b0b0c; }
+    ::-webkit-scrollbar { width: 12px; }
+    ::-webkit-scrollbar-track { background: #0b0b0c; }
+    ::-webkit-scrollbar-thumb { min-height: 48px; border: 3px solid #0b0b0c; border-radius: 999px; background: #55585c; }
+    ::-webkit-scrollbar-thumb:hover { background: #70747a; }
+    ::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+    body {
+      margin: 0;
+      max-width: 100%;
+      overflow-x: clip;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .24;
+      background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, #000, transparent 72%);
+    }
+    a { color: inherit; text-decoration: none; }
+    .wrap { width: min(var(--max), calc(100% - 48px)); margin: 0 auto; }
+    .nav-shell { position: sticky; top: 0; z-index: 100; isolation: isolate; border-bottom: 1px solid var(--line); background: rgba(9,9,10,.96); backdrop-filter: blur(18px); }
+    nav { height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: inline-flex; align-items: center; gap: 11px; font-size: 20px; font-weight: 800; letter-spacing: .14em; }
+    .brand img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 24px rgba(255,101,20,.35); }
+    .brand em { color: var(--orange); font-style: normal; }
+    .nav-links { display: flex; gap: 28px; color: var(--muted); font-size: 13px; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-button { border: 1px solid var(--line); border-radius: 7px; padding: 10px 15px; font-size: 13px; background: var(--surface); }
+    .nav-button:hover { border-color: rgba(255,255,255,.32); }
+    .hero { min-height: 760px; display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: 54px; padding: 84px 0 100px; }
+    .hero-copy { grid-column: 1; grid-row: 1; }
+    .hero > .visual { grid-column: 2; grid-row: 1; }
+    .eyebrow { color: var(--orange-soft); font: 700 11px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .18em; text-transform: uppercase; }
+    .hero-eyebrow { display: inline-flex; margin: 0; padding: 6px 12px; border: 1px solid rgba(255,101,20,.2); border-radius: 6px; background: rgba(255,101,20,.1); color: var(--orange); font-family: "Poppins", sans-serif; font-size: 12px; font-weight: 600; letter-spacing: .16em; line-height: 1.25; box-shadow: 0 0 24px rgba(255,91,0,.12); }
+    h1 { max-width: 610px; margin: 20px 0 22px; font-size: clamp(48px, 5.4vw, 52px); line-height: .94; letter-spacing: normal; text-transform: uppercase; white-space: normal; }
+    h1 span { color: var(--orange); }
+    .lead { max-width: 470px; color: var(--muted); font-size: 18px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 11px; margin-top: 32px; }
+    .button { display: inline-flex; align-items: center; gap: 10px; border-radius: 7px; padding: 13px 18px; font-size: 14px; font-weight: 750; transition: transform .2s, border-color .2s, box-shadow .2s; }
+    .button.primary { color: #1a0b03; background: var(--orange); box-shadow: 0 12px 36px rgba(255,101,20,.2); }
+    .button.primary:hover { transform: translateY(-2px); box-shadow: 0 16px 42px rgba(255,101,20,.32); }
+    .button.secondary { border: 1px solid var(--line); background: var(--surface); }
+    .button.secondary:hover { border-color: rgba(255,255,255,.35); }
+    .hero .actions { margin-top: 32px; gap: 12px 16px; }
+    .hero .actions .button { min-height: 48px; padding: 10px 18px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+    .hero .actions .button.primary { color: #fff; background: linear-gradient(90deg, #ff6514, #ff750b); box-shadow: 0 10px 35px rgba(255,91,0,.25); }
+    .hero .actions .button.primary:hover { filter: brightness(1.1); transform: none; }
+    .hero .actions .button.secondary { border-color: rgba(255,255,255,.2); background: rgba(0,0,0,.25); backdrop-filter: blur(8px); }
+    .hero .actions .button.secondary:hover { border-color: rgba(255,101,20,.65); background: rgba(255,255,255,.05); }
+    .hero .actions .button-arrow { font-size: 24px; line-height: .7; transition: transform .2s ease; }
+    .hero .actions .button.primary:hover .button-arrow { transform: translateX(4px); }
+    .hero .actions .button-play { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid rgba(255,255,255,.6); border-radius: 50%; font-size: 10px; line-height: 1; }
+    .compat { display: flex; align-items: center; gap: 9px; margin-top: 28px; color: var(--muted); font-size: 12px; }
+    .compat i { width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: rgba(115, 255, 0, 0.75); box-shadow: 0 0 13px rgba(183,215,157,.75); animation: compat-dot-blink 1.7s ease-in-out infinite; }
+    @keyframes compat-dot-blink { 0%,100% { opacity: .35; box-shadow: 0 0 4px rgba(183,215,157,.3); } 50% { opacity: 1; box-shadow: 0 0 14px rgba(183,215,157,.9); } }
+    .hero-features { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 76px; }
+    .hero-feature { min-width: 0; }
+    .hero-feature-icon { display: grid; place-items: center; width: 38px; height: 38px; margin-bottom: 12px; border: 1px solid rgba(255,101,20,.34); border-radius: 7px; color: var(--orange); background: rgba(255,101,20,.08); font-size: 17px; }
+    .hero-feature-icon img { width: 19px; height: 19px; object-fit: contain; }
+    .hero-feature strong { display: block; color: var(--text); font-size: 13px; line-height: 1.2; white-space: nowrap; }
+    .hero-feature small { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; line-height: 1.35; }
+    .visual { position: relative; min-width: 0; }
+    .visual::after { content: none; }
+    .media-frame { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #141416; box-shadow: 0 30px 90px rgba(0,0,0,.46); }
+    .media-frame img { display: block; width: 100%; height: auto; }
+    .hero-media img { aspect-ratio: 2 / 1; object-fit: cover;  }
+    .hero-wheel-stage { position: relative; min-height: 560px; display: grid; place-items: center; overflow: visible; background: radial-gradient(circle at 50% 50%, rgba(255,101,20,.19) 0%, rgba(255,101,20,.10) 22%, rgba(255,101,20,.045) 43%, rgba(255,101,20,.015) 58%, transparent 74%); }
+    .hero-media { overflow: visible; border: 0; background: transparent; box-shadow: none; }
+    .hero-wheel { position: relative; width: 330px; height: 330px; pointer-events: auto; }
+    .hero-wheel::before { content: ''; position: absolute; inset: 50px; border: 1px solid rgba(120,120,120,.18); border-radius: 50%; }
+    .hero-wheel-line { position: absolute; left: 50%; top: 50%; z-index: 0; display: block; width: 140px; height: 1px; transform-origin: left center; background: repeating-linear-gradient(90deg, rgba(241,118,5,.9) 0 7px, transparent 7px 12px); opacity: .9; }
+    .hero-wheel-slot { position: absolute; left: 50%; top: 50%; z-index: 1; width: 64px; height: 64px; padding: 8px; border: 1px solid rgba(150,150,150,.55); border-radius: 50%; background: #252525; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(-125px) rotate(calc(var(--angle) * -1)); }
+    .hero-wheel-slot img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
+    .hero-wheel-slot:hover { border-color: #f17605; border-width: 2px; background: #2b211a; }
+    .hero-wheel-slot:hover + .hero-wheel-slot { border-color: rgba(150,150,150,.55); }
+    .hero-wheel-center { position: absolute; left: 50%; top: 50%; width: 32px; height: 32px; border: 2px solid #4774b8; border-radius: 50%; background: #202020; transform: translate(-50%,-50%); }
+    .hero-wheel-center::after { content: ''; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; border-radius: 50%; background: #f17605; transform: translate(-50%,-50%); }
+    .hero-wheel-label { position: absolute; left: 50%; top: 50%; z-index: 2; display: block; width: 112px; color: #e2e2e2; text-align: center; font: 10px ui-monospace, monospace; white-space: nowrap; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(-170px) rotate(calc(var(--angle) * -1)); }
+    .hero-wheel { width: 520px; height: 520px; }
+    .hero-wheel.wheel-ring { left: 50%; top: 50%; transform: translate(-50%,-50%) scale(1); }
+    .hero-wheel::before { content: none; }
+    .hero-wheel .wheel-slot { pointer-events: auto; }
+    .hero-wheel { transition: transform .18s ease; }
+    .hero-wheel .wheel-slot { width: 84px; height: 84px; padding: 9px; }
+    .hero-wheel .wheel-label { width: 132px; font-size: 10px; letter-spacing: .02em; }
+    .hero-wheel .wheel-guide { width: 190px; }
+    .hero-wheel-orbit { position: absolute; inset: 0; transform-origin: 50% 50%; will-change: transform; }
+    .hero-wheel-orbit::before { content: ''; position: absolute; left: 50%; top: 50%; width: calc(var(--orbit-radius) * 2); height: calc(var(--orbit-radius) * 2); border: 0px solid rgba(130, 130, 130, 0); border-radius: 50%; transform: translate(-50%,-50%); }
+    .hero-wheel-spoke { position: absolute; left: 50%; top: 50%; z-index: 0; width: 140px; height: 1px; transform-origin: left center; transform: rotate(var(--spoke-angle)); background: repeating-linear-gradient(90deg, rgba(241,118,5,.82) 0 7px, transparent 7px 12px); opacity: .78; pointer-events: none; }
+    .hero-wheel-orbit.inner { --orbit-radius: 40px; animation: none; transform: scale(1.25); }
+    .hero-wheel-orbit.outer { --orbit-radius: 238px; animation: hero-ring-outer-spin 112s linear infinite; }
+    .hero-wheel-scroll-layer { position: absolute; inset: 0; opacity: .26; filter: blur(2px); transform: scale(calc(var(--hero-scroll-scale, 1) * 1.3)) rotate(var(--hero-scroll-rotation, 0deg)); transform-origin: 50% 50%; transition: transform .12s linear; will-change: transform; }
+    .hero-brush-node { position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; transform: translate(-50%,-50%) rotate(var(--slot-angle)) translateY(calc(var(--slot-radius) * -1)); transform-origin: 50% 50%; }
+    .hero-wheel-orbit.outer .hero-brush-node { width: 82px; height: 82px; }
+    .hero-brush-node .wheel-slot { position: relative; left: auto; top: auto; width: 100%; height: 100%; padding: 8px; transform: rotate(calc(var(--slot-angle) * -1)); }
+    .hero-wheel-orbit.inner .hero-brush-node .wheel-slot { animation: none; }
+    .hero-wheel-orbit.outer .hero-brush-node .wheel-slot { animation: hero-outer-node-counter 112s linear infinite; }
+    .hero-wheel-main-label { position: absolute; left: calc(50% + var(--label-x)); top: calc(50% + var(--label-y)); z-index: 3; width: 138px; color: #f1f1f1c7; text-align: center; font: 300 10px/1.2 "Poppins", sans-serif; white-space: nowrap; pointer-events: none; transform: translate(-50%,-50%); }
+    .hero-wheel-main-label.is-active { color: #f17605; }
+    @keyframes hero-ring-inner-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes hero-ring-outer-spin { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+    @keyframes hero-inner-node-counter { from { transform: rotate(calc(var(--slot-angle) * -1)); } to { transform: rotate(calc(var(--slot-angle) * -1 - 360deg)); } }
+    @keyframes hero-outer-node-counter { from { transform: rotate(calc(var(--slot-angle) * -1)); } to { transform: rotate(calc(var(--slot-angle) * -1 + 360deg)); } }
+    .media-label { position: absolute; left: 18px; bottom: 18px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.16); border-radius: 6px; color: #e7e3dc; background: rgba(9,9,10,.78); font: 11px ui-monospace, monospace; letter-spacing: .08em; }
+    .section { padding: 104px 0; border-top: 1px solid var(--line); }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 36px; margin-bottom: 34px; }
+    .section-head h2 span, .install-card h2 span { color: var(--orange); }
+    h2 { max-width: 650px; margin: 0; color: #fff; font-family: "Poppins", sans-serif; font-size: clamp(30px, 3vw, 40px); font-weight: 500; line-height: 1.15; letter-spacing: -.025em; }
+    .section .eyebrow { margin-bottom: 12px; color: var(--orange); font-family: "Poppins", sans-serif; font-size: 14px; font-weight: 600; letter-spacing: .18em; line-height: 1.25; text-transform: uppercase; }
+    .workspace-eyebrow { margin-bottom: 12px; color: var(--orange); font-family: "Poppins", sans-serif; font-size: 14px; font-weight: 600; letter-spacing: .18em; line-height: 1.25; text-transform: uppercase; }
+    .workspace-title { max-width: 650px; margin: 0; color: #fff; font-family: "Poppins", sans-serif; font-size: clamp(30px, 3vw, 40px); font-weight: 500; line-height: 1.15; letter-spacing: -.025em; }
+    .section-head > p { max-width: 370px; margin: 0; color: var(--muted); font-size: 14px; }
+    .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
+    .feature { min-height: 230px; padding: 24px; border: 1px solid var(--line); border-radius: 9px; background: linear-gradient(145deg, var(--surface-2), var(--surface)); }
+    .feature-number { color: var(--orange); font: 12px ui-monospace, monospace; }
+    .feature h3 { margin: 52px 0 8px; font-size: 20px; letter-spacing: -.03em; }
+    .feature p { margin: 0; color: var(--muted); font-size: 14px; }
+    .gallery { display: grid; grid-template-columns: 1.12fr .88fr; gap: 14px; align-items: stretch; }
+    figure { margin: 0; min-width: 0; }
+    .gallery .media-frame { overflow: hidden; }
+    .gallery img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .gallery figure:first-child { grid-row: span 2; }
+    .gallery figure:first-child img { aspect-ratio: 1.55; }
+    .editor-gallery { grid-template-columns: 1fr; }
+    .editor-gallery .editor-gallery-main { grid-row: auto; }
+    .editor-gallery .editor-gallery-main .media-frame { height: auto; aspect-ratio: 1.563; background: #111216; }
+    .editor-gallery .editor-gallery-main img { aspect-ratio: auto; object-fit: contain; object-position: center; background: #111216; }
+    figcaption { padding: 16px 2px 0; color: var(--muted); font-size: 13px; }
+    /* Keep legacy sections hidden while the new feature showcase stays visible. */
+    #editor { display: none !important; }
+    figcaption strong { display: block; margin-bottom: 4px; color: var(--text); font-size: 16px; }
+    .editor-experience { overflow: hidden; border: 1px solid #34373b; border-radius: 9px; background: #111214; box-shadow: 0 24px 70px rgba(0,0,0,.28); }
+    .experience-toolbar { display: flex; min-height: 54px; align-items: center; justify-content: space-between; gap: 24px; padding: 7px 9px 7px 16px; border-bottom: 1px solid #34373b; background: #202226; }
+    .experience-window-title { display: flex; align-items: center; gap: 10px; color: #f0f0ee; font-size: 12px; font-weight: 600; }
+    .experience-window-title::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); }
+    .experience-window-title small { color: #777b80; font: 9px "CG Geist Mono", monospace; letter-spacing: .08em; }
+    .experience-tabs { display: flex; gap: 7px; }
+    .experience-tab { display: inline-flex; min-height: 36px; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid transparent; border-radius: 5px; color: #9b9da0; background: transparent; font: 600 11px "Poppins", sans-serif; cursor: pointer; transition: color .18s ease, border-color .18s ease, background .18s ease; }
+    .experience-tab span { color: #6d7074; font: 9px "CG Geist Mono", monospace; }
+    .experience-tab:hover { color: #fff; background: #2a2c30; }
+    .experience-tab.active { border-color: #4a4d51; color: #fff; background: #303237; }
+    .experience-tab.active span { color: var(--orange); }
+    .experience-screen { position: relative; display: grid; min-width: 0; min-height: 610px; place-items: center; overflow: hidden; padding: 14px; background: #0f1012; cursor: pointer; }
+    .experience-screen img { display: block; width: 100%; max-height: 690px; object-fit: contain; border: 1px solid #292b2e; border-radius: 4px; background: #111214; }
+    .experience-screen-note { position: absolute; right: 28px; bottom: 28px; padding: 8px 10px; border: 1px solid #414449; border-radius: 4px; color: #d0d1d2; background: rgba(19,20,22,.9); font: 9px "CG Geist Mono", monospace; }
+    .experience-statusbar { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 20px; min-height: 58px; padding: 10px 16px; border-top: 1px solid #34373b; background: #202226; }
+    .experience-statusbar p { margin: 0; color: #b0b2b5; font-size: 12px; line-height: 1.45; }
+    .experience-statusbar strong { color: #fff; font-weight: 600; }
+    .experience-step { color: var(--orange); font: 10px "CG Geist Mono", monospace; white-space: nowrap; }
+    .editor-capability-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; margin-top: 42px; }
+    .editor-capability-card { position: relative; display: flex; min-height: 390px; flex-direction: column; overflow: hidden; padding: 30px; border: 1px solid rgba(255,255,255,.12); border-radius: 18px; background: radial-gradient(circle at 78% 24%, rgba(255,92,0,.09), transparent 34%), linear-gradient(145deg, #191714, #11100e); box-shadow: inset 0 1px rgba(255,255,255,.025), 0 22px 50px rgba(0,0,0,.2); }
+    .editor-capability-card.span-3 { grid-column: span 3; }
+    .editor-capability-card.span-2 { grid-column: span 2; min-height: 360px; }
+    .editor-capability-card.span-4 { grid-column: span 4; min-height: 360px; }
+    .editor-capability-card:nth-child(1), .editor-capability-card:nth-child(3) { border-color: #e7e0d3; background: radial-gradient(circle at 72% 42%, rgba(255,101,20,.09), transparent 30%), #f3efe7; box-shadow: 0 22px 50px rgba(0,0,0,.12); }
+    .editor-capability-card:nth-child(1) h3, .editor-capability-card:nth-child(3) h3 { color: #171614; }
+    .editor-capability-card:nth-child(1) p, .editor-capability-card:nth-child(3) p { color: #77736d; }
+    .editor-capability-card:nth-child(1) .editor-capability-num, .editor-capability-card:nth-child(3) .editor-capability-num { color: #a7a198; }
+    .editor-capability-copy { position: relative; z-index: 4; max-width: 490px; }
+    .editor-capability-num { display: block; margin-bottom: 12px; color: var(--orange); font: 600 11px/1.3 "CG Geist Mono", ui-monospace, monospace; letter-spacing: .12em; }
+    .editor-capability-card h3 { max-width: 460px; margin: 0; color: #f5f5f3; font-family: "Poppins", sans-serif; font-size: clamp(23px, 2vw, 32px); font-weight: 600; line-height: 1.08; letter-spacing: -.035em; }
+    .editor-capability-card p { max-width: 470px; margin: 14px 0 0; color: #a9a9a4; font-size: 14px; line-height: 1.65; }
+    .cap-visual { position: relative; width: 100%; height: 230px; min-width: 0; flex: 0 0 auto; margin-top: 20px; }
+    .editor-capability-card:nth-child(1), .editor-capability-card:nth-child(2), .editor-capability-card:nth-child(4) { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(220px, .98fr); align-items: center; gap: 24px; }
+    .editor-capability-card:nth-child(1) .cap-visual, .editor-capability-card:nth-child(2) .cap-visual, .editor-capability-card:nth-child(4) .cap-visual { margin-top: 0; }
+    .editor-capability-card:nth-child(3) .cap-visual { height: 170px; margin-top: auto; }
+    .cap-brush { display: grid; width: 50px; height: 50px; place-items: center; overflow: hidden; border: 1px solid #53565a; border-radius: 50%; background: #202225; box-shadow: 0 9px 20px rgba(0,0,0,.3); }
+    .cap-brush img { display: block; width: 88%; height: 88%; object-fit: contain; }
+    .cap-wheel { position: absolute; left: 50%; top: 50%; width: 180px; height: 180px; transform: translate(-50%,-50%); border: 1px solid rgba(30,27,24,.1); border-radius: 50%; }
+    .cap-wheel::after { content: ""; position: absolute; left: 50%; top: 50%; width: 25px; height: 25px; transform: translate(-50%,-50%); border: 2px solid #307ac4; border-radius: 50%; background: radial-gradient(circle, #f36d18 0 3px, #17191c 4px); box-shadow: 0 0 22px rgba(255,100,20,.22); }
+    .cap-wheel-line { position: absolute; left: 50%; top: 50%; width: 68px; height: 1px; transform-origin: 0 50%; border-top: 1px solid rgba(255,101,20,.44); }
+    .cap-wheel .cap-brush { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%) rotate(var(--a)) translateX(90px) rotate(calc(-1 * var(--a))); }
+    .cap-wheel-line:nth-of-type(1) { transform: rotate(0deg); }.cap-wheel-line:nth-of-type(2) { transform: rotate(45deg); }.cap-wheel-line:nth-of-type(3) { transform: rotate(90deg); }.cap-wheel-line:nth-of-type(4) { transform: rotate(135deg); }.cap-wheel-line:nth-of-type(5) { transform: rotate(180deg); }.cap-wheel-line:nth-of-type(6) { transform: rotate(225deg); }.cap-wheel-line:nth-of-type(7) { transform: rotate(270deg); }.cap-wheel-line:nth-of-type(8) { transform: rotate(315deg); }
+    .cap-editor { display: grid; grid-template-columns: 1.08fr .92fr; gap: 8px; height: 100%; padding: 9px; border: 1px solid #34373b; border-radius: 8px; background: #111216; }
+    .cap-editor-stage, .cap-editor-library { position: relative; overflow: hidden; border: 1px solid #292c30; border-radius: 5px; background: #15171a; }
+    .cap-editor-bar { height: 27px; border-bottom: 1px solid #303338; background: #1d1f22; color: #b7b8ba; font: 9px/27px "CG Geist Mono", monospace; text-indent: 10px; }
+    .cap-editor-wheel { position: absolute; left: 50%; top: 56%; width: 126px; height: 126px; transform: translate(-50%,-50%); border: 1px solid rgba(255,255,255,.06); border-radius: 50%; }
+    .cap-editor-wheel::after { content: ""; position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; transform: translate(-50%,-50%); border: 1px solid #3479b8; border-radius: 50%; background: radial-gradient(circle,#f56b14 0 2px,#17191b 3px); }
+    .cap-editor-wheel .cap-brush { position: absolute; left: 50%; top: 50%; width: 37px; height: 37px; transform: translate(-50%,-50%) rotate(var(--a)) translateX(62px) rotate(calc(-1 * var(--a))); }
+    .cap-library-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 9px; }
+    .cap-library-item { display: grid; min-height: 52px; place-items: center; border: 1px solid #303338; border-radius: 4px; background: #222428; }
+    .cap-library-item img { width: 39px; height: 39px; object-fit: contain; }
+    .cap-drag-path { position: absolute; z-index: 5; left: 52%; top: 48%; width: 82px; border-top: 1px dashed var(--orange); transform: rotate(-18deg); transform-origin: left center; }
+    .cap-drag-path::after { content: "›"; position: absolute; right: -3px; top: -13px; color: var(--orange); font-size: 20px; }
+    .cap-submenu { position: absolute; left: 50%; top: 50%; width: 250px; height: 150px; transform: translate(-50%,-50%); }
+    .cap-sub-main { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); }
+    .cap-sub-child { position: absolute; bottom: 6px; }.cap-sub-child.left { left: 35px; }.cap-sub-child.right { right: 35px; }
+    .cap-sub-link { position: absolute; left: 50%; top: 72px; width: 84px; border-top: 1px dashed rgba(242,107,20,.78); transform-origin: 0 center; }.cap-sub-link.left { transform: rotate(132deg); }.cap-sub-link.right { transform: rotate(48deg); }
+    .cap-sub-label { position: absolute; color: #d8d8d5; font: 10px "CG Geist Mono", monospace; white-space: nowrap; }.cap-sub-label.main { left: 50%; top: 82px; transform: translateX(-50%); color: var(--orange-soft); }.cap-sub-label.left { left: 15px; bottom: -10px; }.cap-sub-label.right { right: 6px; bottom: -10px; }
+    .cap-native { display: grid; width: min(100%, 610px); grid-template-columns: 210px minmax(58px,82px) minmax(210px,250px); align-items: center; justify-content: center; height: 100%; margin: 0 auto; padding: 4px; }
+    .cap-native-wheel { position: relative; width: 178px; height: 178px; margin: auto; border: 1px solid rgba(255,255,255,.09); border-radius: 50%; }
+    .cap-native-wheel::after { content: ""; position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; transform: translate(-50%,-50%); border: 1px solid #347bc2; border-radius: 50%; background: radial-gradient(circle,#ff6c16 0 2px,#181a1c 3px); }
+    .cap-native-wheel .cap-brush { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; transform: translate(-50%,-50%) rotate(var(--a)) translateX(86px) rotate(calc(-1 * var(--a))); }
+    .cap-native-transfer { position: relative; height: 1px; border-top: 1px dashed var(--orange); }.cap-native-transfer::after { content: "›"; position: absolute; right: -3px; top: -14px; color: var(--orange); font-size: 22px; }
+    .cap-native-panel { width: 100%; padding: 13px; border: 1px solid #383b40; border-radius: 7px; background: #1a1c1f; }
+    .cap-native-panel small { display: block; color: #898d91; font: 9px "CG Geist Mono", monospace; letter-spacing: .08em; }
+    .cap-native-active { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 11px; border: 1px solid rgba(255,108,22,.55); border-radius: 5px; background: #242629; color: #f1f1ee; font-size: 12px; }
+    .cap-native-active img { width: 55px; height: 55px; object-fit: contain; }
+    /* Sculpt-Wheel feature story: an original dark layout with self-running demos. */
+    .editor-capability-grid { display: flex; flex-direction: column; gap: 18px; margin-top: 44px; }
+    .editor-capability-card,
+    .editor-capability-card.span-2,
+    .editor-capability-card.span-3,
+    .editor-capability-card.span-4 { display: grid; width: 100%; min-height: 350px; grid-template-columns: minmax(280px,.82fr) minmax(420px,1.18fr); grid-template-areas: "copy visual"; align-items: center; gap: clamp(36px,6vw,92px); margin: 0; padding: clamp(34px,5vw,68px); border: 1px solid rgba(255,255,255,.1); border-radius: 22px; color: #f5f5f3; background: radial-gradient(circle at 78% 50%, rgba(255,91,10,.12), transparent 32%), linear-gradient(125deg,#0d0e10,#171513 58%,#0c0d0f); box-shadow: inset 0 1px rgba(255,255,255,.025), 0 28px 70px rgba(0,0,0,.24); animation: capCardIn .7s both; }
+    .editor-capability-card:nth-child(even) { grid-template-columns: minmax(420px,1.18fr) minmax(280px,.82fr); grid-template-areas: "visual copy"; background: radial-gradient(circle at 22% 50%, rgba(53,113,177,.1), transparent 34%), linear-gradient(235deg,#0d0e10,#151617 58%,#0b0c0e); }
+    .editor-capability-card:nth-child(2) { width: 94%; margin-left: auto; animation-delay: .08s; }
+    .editor-capability-card:nth-child(3) { width: 88%; margin-right: auto; animation-delay: .16s; }
+    .editor-capability-card:nth-child(4) { width: 96%; margin-left: auto; animation-delay: .24s; }
+    .editor-capability-card:nth-child(1), .editor-capability-card:nth-child(3) { border-color: rgba(255,255,255,.1); background: radial-gradient(circle at 78% 50%, rgba(255,91,10,.12), transparent 32%), linear-gradient(125deg,#0d0e10,#171513 58%,#0c0d0f); box-shadow: inset 0 1px rgba(255,255,255,.025), 0 28px 70px rgba(0,0,0,.24); }
+    .editor-capability-card:nth-child(1) h3, .editor-capability-card:nth-child(3) h3 { color: #f5f5f3; }
+    .editor-capability-card:nth-child(1) p, .editor-capability-card:nth-child(3) p { color: #aaa9a5; }
+    .editor-capability-card:nth-child(1) .editor-capability-num, .editor-capability-card:nth-child(3) .editor-capability-num { color: var(--orange); }
+    .editor-capability-copy { grid-area: copy; position: relative; z-index: 4; max-width: 470px; }
+    .editor-capability-card h3 { font-size: clamp(28px,3vw,44px); }
+    .editor-capability-card p { max-width: 450px; font-size: 15px; }
+    .editor-capability-card .cap-visual,
+    .editor-capability-card:nth-child(1) .cap-visual,
+    .editor-capability-card:nth-child(2) .cap-visual,
+    .editor-capability-card:nth-child(3) .cap-visual,
+    .editor-capability-card:nth-child(4) .cap-visual { grid-area: visual; width: 100%; height: 255px; margin: 0; padding: 0; }
+    .editor-capability-card:nth-child(3) .cap-visual { height: 210px; }
+    .editor-capability-card::after { content: ""; position: absolute; inset: auto 8% 0; height: 1px; background: linear-gradient(90deg,transparent,rgba(255,101,20,.28),transparent); }
+    .cap-wheel > .cap-brush { animation: capSlotCycle 8s ease-in-out infinite; }
+    .cap-wheel > .cap-brush:nth-of-type(1) { animation-delay: 0s; }.cap-wheel > .cap-brush:nth-of-type(2) { animation-delay: 1s; }.cap-wheel > .cap-brush:nth-of-type(3) { animation-delay: 2s; }.cap-wheel > .cap-brush:nth-of-type(4) { animation-delay: 3s; }.cap-wheel > .cap-brush:nth-of-type(5) { animation-delay: 4s; }.cap-wheel > .cap-brush:nth-of-type(6) { animation-delay: 5s; }.cap-wheel > .cap-brush:nth-of-type(7) { animation-delay: 6s; }.cap-wheel > .cap-brush:nth-of-type(8) { animation-delay: 7s; }
+    .cap-drag-brush { position: absolute; z-index: 8; left: 76%; top: 28%; display: grid; width: 39px; height: 39px; place-items: center; border: 1px solid var(--orange); border-radius: 7px; background: #282a2e; box-shadow: 0 0 22px rgba(255,101,20,.3); animation: capDragBrush 6s cubic-bezier(.65,0,.2,1) infinite; }
+    .cap-drag-brush img { width: 34px; height: 34px; object-fit: contain; }
+    .cap-sub-main { animation: capMainPulse 4.8s ease-in-out infinite; }
+    .cap-sub-child, .cap-sub-label, .cap-sub-link { animation: capSubReveal 4.8s ease-in-out infinite; }
+    .cap-sub-child.right, .cap-sub-label.right, .cap-sub-link.right { animation-delay: .14s; }
+    .cap-native-transfer::before { content: ""; position: absolute; top: -4px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 14px var(--orange); animation: capTransfer 3.2s ease-in-out infinite; }
+    .cap-native-active { animation: capActiveSync 3.2s ease-in-out infinite; }
+    @keyframes capCardIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+    @keyframes capSlotCycle { 0%,9%,100% { border-color:#53565a; filter:brightness(.78); } 3%,6% { border-color:var(--orange); filter:brightness(1.18); box-shadow:0 0 0 2px rgba(255,101,20,.22),0 12px 24px rgba(0,0,0,.35); } }
+    @keyframes capDragBrush { 0%,10% { opacity:0; transform:translate(0,0) scale(.75); } 18% { opacity:1; transform:translate(0,0) scale(1); } 58% { opacity:1; transform:translate(-185px,105px) scale(1); } 66%,82% { opacity:1; transform:translate(-185px,105px) scale(.9); } 92%,100% { opacity:0; transform:translate(-185px,105px) scale(.72); } }
+    @keyframes capMainPulse { 0%,100% { border-color:#53565a; } 20%,62% { border-color:var(--orange); box-shadow:0 0 0 2px rgba(255,101,20,.15),0 12px 24px rgba(0,0,0,.34); } }
+    @keyframes capSubReveal { 0%,18%,82%,100% { opacity:0; filter:blur(4px); } 32%,70% { opacity:1; filter:blur(0); } }
+    @keyframes capTransfer { 0% { left:0; opacity:0; } 15% { opacity:1; } 80% { opacity:1; } 100% { left:calc(100% - 8px); opacity:0; } }
+    @keyframes capActiveSync { 0%,35%,100% { border-color:rgba(255,108,22,.3); box-shadow:none; } 55%,75% { border-color:var(--orange); box-shadow:0 0 24px rgba(255,101,20,.16); } }
+    @media (max-width: 1000px) {
+      .editor-capability-card,
+      .editor-capability-card.span-2,
+      .editor-capability-card.span-3,
+      .editor-capability-card.span-4,
+      .editor-capability-card:nth-child(even) { display: flex; width: 100%; min-height: 500px; margin: 0; padding: 34px; }
+      .editor-capability-card .cap-visual,
+      .editor-capability-card:nth-child(1) .cap-visual,
+      .editor-capability-card:nth-child(2) .cap-visual,
+      .editor-capability-card:nth-child(3) .cap-visual,
+      .editor-capability-card:nth-child(4) .cap-visual { height: 250px; margin-top: auto; }
+    }
+    @media (prefers-reduced-motion: reduce) { .editor-capability-card, .cap-wheel > .cap-brush, .cap-drag-brush, .cap-sub-main, .cap-sub-child, .cap-sub-label, .cap-sub-link, .cap-native-transfer::before, .cap-native-active { animation:none !important; } }
+    .workspace-demo { overflow: hidden; border: 1px solid rgba(255,255,255,.14); border-radius: 12px; background: #0b0e11; box-shadow: 0 30px 90px rgba(0,0,0,.5); }
+    .zb-menubar { display: flex; gap: 15px; overflow: hidden; padding: 9px 14px; border-bottom: 1px solid #293038; color: #949da5; background: #10151a; font: 10px ui-monospace, monospace; white-space: nowrap; }
+    .zb-menubar-item:hover { color: var(--orange-soft); }
+    .zb-toolbar { display: flex; align-items: center; gap: 13px; min-height: 49px; padding: 8px 14px; border-bottom: 1px solid #293038; background: #161c21; }
+    .zb-toolbar-group { display: flex; align-items: center; gap: 5px; padding-right: 13px; border-right: 1px solid #30383f; }
+    .zb-toolbar-group:last-child { border: 0; }
+    .zb-pill, .zb-tile, .zb-toolbar-tag, .zb-slider { display: block; width: 25px; height: 24px; border: 1px solid #3d4851; border-radius: 4px; background: linear-gradient(145deg,#303a42,#1b2228); }
+    .zb-pill { width: 20px; height: 20px; border-radius: 50%; }
+    .zb-pill--sm { width: 34px; height: 10px; border-radius: 3px; }
+    .zb-tile--active, .zb-toolbar-tag--active { border-color: rgba(255,101,20,.8); box-shadow: inset 0 0 0 1px rgba(255,101,20,.2); }
+    .zb-tile--orb { border-radius: 50%; }
+    .zb-toolbar-tag { width: 20px; height: 13px; }
+    .zb-slider { width: 58px; height: 6px; border-radius: 9px; }
+    .zb-workspace { display: grid; grid-template-columns: 112px 1fr 176px; min-height: 420px; }
+    .zb-left-shelf, .zb-right-panel { background: #11171c; }
+    .zb-left-shelf { display: grid; align-content: start; grid-template-columns: repeat(2, 1fr); gap: 7px; padding: 12px 8px; border-right: 1px solid #293038; }
+    .zb-bigtile { display: grid; place-items: center; min-height: 57px; padding: 5px 2px; border: 1px solid #303a42; border-radius: 5px; background: #1a2228; color: #8f9aa3; font-size: 9px; text-align: center; }
+    .zb-bigtile:hover, .zb-bigtile--active { border-color: var(--orange); color: #f4eee7; background: #242d34; }
+    .zb-bigtile-glyph, .zb-bigtile-active-img { width: 28px; height: 28px; margin-bottom: 4px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #d9a77e, #7b4230 52%, #20262b 55%); }
+    .zb-bigtile-label { overflow: hidden; max-width: 100%; text-overflow: ellipsis; white-space: nowrap; }
+    .zb-color-block, .zb-color-swatch, .zb-alt-pill { grid-column: 1 / -1; }
+    .zb-color-block { display: grid; place-items: center; min-height: 67px; border: 1px solid #303a42; border-radius: 5px; background: radial-gradient(circle, #ef7940, #5d2931 42%, #151a1f 43%); }
+    .zb-color-wheel { width: 31px; height: 31px; border: 2px solid #f1e2c2; border-radius: 50%; background: conic-gradient(#e74c3c,#f2d34b,#4ecdc4,#6255d9,#e74c3c); opacity: .78; }
+    .zb-color-label { display: block; margin-top: 3px; color: #a5adb4; font-size: 9px; }
+    .zb-color-swatch { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 7px; border: 1px solid #303a42; border-radius: 5px; }
+    .zb-swatch-black, .zb-swatch-white { width: 23px; height: 23px; border: 1px solid #6c747b; border-radius: 50%; background: #050505; }
+    .zb-swatch-white { margin-left: -10px; background: #eee; }
+    .zb-alt-pill { padding: 6px; border: 1px solid #303a42; border-radius: 4px; color: #a5adb4; font-size: 9px; text-align: center; }
+    .zb-canvas { position: relative; min-width: 0; overflow: hidden; background: radial-gradient(circle at 52% 46%, rgba(255,101,20,.16), transparent 24%), radial-gradient(circle at 50% 47%, #313b43, #141a1e 39%, #0d1115 70%); }
+    .zb-canvas::before { content: ''; position: absolute; inset: 13% 18%; border: 1px solid rgba(255,255,255,.08); border-radius: 50%; box-shadow: 0 0 0 34px rgba(255,255,255,.025), 0 0 70px rgba(255,101,20,.14); }
+    .zb-canvas::after { content: 'SCULPT-WHEEL'; position: absolute; top: 17px; left: 20px; color: rgba(255,255,255,.3); font: 10px ui-monospace, monospace; letter-spacing: .16em; }
+    .rz-active-label { position: absolute; right: 18px; bottom: 18px; z-index: 1; padding: 10px 12px; border: 1px solid rgba(255,255,255,.15); border-radius: 5px; background: rgba(10,13,15,.75); }
+    .rz-active-eyebrow { color: var(--orange-soft); font: 9px ui-monospace, monospace; letter-spacing: .12em; }
+    .rz-active-name { margin-top: 3px; color: #fff; font-size: 17px; font-weight: 700; }
+    .rz-active-status { color: #9aa4aa; font-size: 10px; }
+    .rz-status-dot { display: inline-block; width: 6px; height: 6px; margin-right: 4px; border-radius: 50%; background: #b7d79d; }
+    .zb-right-panel { overflow: hidden; border-left: 1px solid #293038; }
+    .zb-tool-header { display: flex; align-items: center; gap: 8px; padding: 12px; border-bottom: 1px solid #293038; color: #f2f4f5; font-size: 12px; font-weight: 700; }
+    .zb-tool-mark { width: 8px; height: 8px; border-radius: 2px; background: var(--orange); }
+    .zb-tool-refresh { width: 10px; height: 10px; margin-left: auto; border: 1px solid #88939b; border-radius: 50%; }
+    .zb-btn-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; padding: 10px; border-bottom: 1px solid #293038; }
+    .zb-btn { height: 20px; border: 1px solid #303a42; border-radius: 3px; background: #20282e; }
+    .zb-btn:hover, .zb-btn--active { border-color: var(--orange); background: #34312b; }
+    .zb-thumb-row { display: flex; gap: 5px; padding: 10px; border-bottom: 1px solid #293038; }
+    .zb-thumb { flex: 1; height: 28px; border: 1px solid #39454e; border-radius: 3px; background: linear-gradient(145deg,#515a60,#20272c); }
+    .zb-thumb--active { border-color: var(--orange); }
+    .zb-tool-list { padding: 6px 8px; }
+    .zb-tool-row { padding: 7px 8px; border-bottom: 1px solid rgba(255,255,255,.05); color: #89949d; font-size: 10px; }
+    .zb-tool-row:hover { color: #f5f2ec; background: #222b31; }
+    .demo-caption { display: flex; justify-content: space-between; gap: 20px; padding: 15px 2px 0; color: var(--muted); font-size: 13px; }
+    .demo-caption strong { color: var(--text); }
+    /* Blender-style viewport preview */
+    .blender-ui { position: relative; z-index: 0; isolation: isolate; display: flex; flex-direction: column; height: auto; aspect-ratio: auto; overflow: hidden; border: 1px solid #303030; border-radius: 8px; background: #191919; color: #d7d7d7; font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; box-shadow: 0 30px 90px rgba(0,0,0,.58); font-family: "Poppins", Arial, sans-serif;
+}
+    .blender-topbar { display: flex; align-items: center; gap: 16px; height: 32px; padding: 0 12px; border-bottom: 1px solid #121212; background: #1b1b1b; color: #c9c9c9; white-space: nowrap; }
+    .blender-logo { color: #f1f2f4; font-weight: 800; letter-spacing: -.05em; }
+    .ui-slot-icon { width: 13px; height: 13px; margin-right: 4px; object-fit: contain; vertical-align: -2px; opacity: .95; }
+    .blender-file { color: #f0a05b; }
+    .blender-menu { color: #b8bbc0; }
+    .blender-mode { margin-left: auto; padding: 6px 10px; border: 1px solid #3d3d3d; border-radius: 3px; background: #292929; }
+    .blender-main { position: relative; display: grid; grid-template-columns: 1fr 246px; flex: 0 0 clamp(506px, 57.2vw, 682px); min-height: 0; height: clamp(506px, 57.2vw, 682px); }
+    .blender-workbar { display: flex; align-items: center; gap: 15px; height: 31px; padding: 0 12px; border-bottom: 1px solid #121212; background: #202020; color: #c5c5c5; }
+    .blender-workbar, .blender-tool-settings { box-sizing: border-box; width: calc(100% - 246px); }
+    .blender-workbar strong { color: #f0f2f5; }
+    .blender-workbar .spacer { flex: 1; }
+    .blender-tool-settings { position: absolute; top: 63px; left: 0; z-index: 5; display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 12px; border-bottom: 0; background: transparent; color: #d0d0d0; }
+    .blender-tool-settings b { color: #fff; }
+    .viewport-shading { display: flex; align-items: center; gap: 5px; margin-left: auto; white-space: nowrap; }
+    .viewport-shading-label { margin-right: 2px; }
+    .viewport-shading img { width: 13px; height: 13px; object-fit: contain; opacity: .9; }
+    .blender-tools { position: absolute; top: 35px; left: 8px; z-index: 5; display: grid; grid-template-columns: repeat(2, 27px); align-content: start; gap: 4px; padding: 0; border: 0; background: transparent; }
+    .bl-tool { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 3px; color: #aeb3ba; font-size: 13px; }
+    .bl-tool:hover, .bl-tool.active { color: #fff; background-color: #df7b35; }
+    .bl-tool { font-size: 0; border: 1px solid rgba(255,255,255,.08); background-size: cover; background-position: center; background-repeat: no-repeat; }
+    .bl-tool:nth-child(1) { background-image: url('assets/sculpt-wheel/brush-icons/default/Clay.png'); }
+    .bl-tool:nth-child(2) { background-image: url('assets/sculpt-wheel/brush-icons/default/Standard.png'); }
+    .bl-tool:nth-child(3) { background-image: url('assets/sculpt-wheel/brush-icons/default/Clay_Buildup.png'); }
+    .bl-tool:nth-child(4) { background-image: url('assets/sculpt-wheel/brush-icons/default/Crease_Polish.png'); }
+    .bl-tool:nth-child(5) { background-image: url('assets/sculpt-wheel/brush-icons/default/Crease_Sharp.png'); }
+    .bl-tool:nth-child(6) { background-image: url('assets/sculpt-wheel/brush-icons/default/Draw%20Sharp.png'); }
+    .bl-tool:nth-child(7) { background-image: url('assets/sculpt-wheel/brush-icons/default/Inflate.png'); }
+    .bl-tool:nth-child(8) { background-image: url('assets/sculpt-wheel/brush-icons/default/Move.png'); }
+    .bl-tool:nth-child(9) { background-image: url('assets/sculpt-wheel/brush-icons/default/Move_Elastic.png'); }
+    /* Brush thumbnails belong to the bottom shelf; the left rail stays a Blender tool rail. */
+    .blender-tools .bl-tool { font-size: 0; background-image: none; background-color: #373737; background-size: 65% 65%; background-position: center; }
+    .blender-tools .bl-tool.active { background-color: #df7b35; }
+    .blender-tools .bl-tool:nth-child(1) { background-image: url('assets/sculpt-wheel/Tools/Scuplt_Mode.png'); }
+    .blender-tools .bl-tool:nth-child(2) { background-image: url('assets/sculpt-wheel/Tools/Draw.png'); }
+    .blender-tools .bl-tool:nth-child(3) { background-image: url('assets/sculpt-wheel/Tools/Box_Select.png'); }
+    .blender-tools .bl-tool:nth-child(4) { background-image: url('assets/sculpt-wheel/Tools/Circle_Select.png'); }
+    .blender-tools .bl-tool:nth-child(5) { background-image: url('assets/sculpt-wheel/Tools/Move.png'); }
+    .blender-tools .bl-tool:nth-child(6) { background-image: url('assets/sculpt-wheel/Tools/Rotate.png'); }
+    .blender-tools .bl-tool:nth-child(7) { background-image: url('assets/sculpt-wheel/Tools/Scale.png'); }
+    .blender-tools .bl-tool:nth-child(8) { background-image: url('assets/sculpt-wheel/Tools/Transform.png'); }
+    .blender-tools .bl-tool:nth-child(9) { background-image: url('assets/sculpt-wheel/Tools/UV_Island_Sel.png'); }
+    .blender-viewport { position: relative; overflow: hidden; min-width: 0; min-height: 0; background: radial-gradient(circle at 49% 48%, #292929 0%, #202020 42%, #171717 100%); }
+    .blender-viewport::marker { content: none; }
+    .brush-cursor { position: absolute; top: 12%; left: 18%; z-index: 2; width: 64px; height: 64px; border: 1px solid #1681e8; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(22,129,232,.18); opacity: .9; }
+    .brush-cursor::after { content: ''; position: absolute; inset: 18px; border: 1px solid rgba(22,129,232,.8); border-radius: 50%; }
+    .blender-viewport::before { content: none; }
+    .blender-viewport::after { content: none; }
+    .wheel-overlay { position: absolute; inset: 0; z-index: 10; background: rgba(8,10,12,.08); opacity: 0; pointer-events: none; transition: opacity .16s ease; }
+    .wheel-overlay.open { opacity: 1; pointer-events: auto; background: rgba(8,10,12,.28); }
+    .wheel-ring { position: absolute; left: var(--wheel-x, 50%); top: var(--wheel-y, 50%); width: 380px; height: 380px; transform: translate(-50%,-50%) scale(.8); transform-origin: center; border-radius: 50%; will-change: transform; }
+    .wheel-overlay.open .wheel-ring { animation: sculpt-wheel-open .16s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes sculpt-wheel-open {
+      from { transform: translate(-50%,-50%) scale(.15); opacity: 0; }
+      to { transform: translate(-50%,-50%) scale(.8); opacity: 1; }
+    }
+    .wheel-ring::before { content: none; }
+    .wheel-ring::after { content: none; }
+    .wheel-guide { position: absolute; left: 50%; top: 50%; z-index: 1; width: 106px; height: 1px; background: repeating-linear-gradient(90deg, rgba(241,118,5,.82) 0 7px, transparent 7px 12px); transform-origin: left center; transform: rotate(var(--guide-angle)); opacity: .85; }
+    .wheel-slot { position: absolute; z-index: 2; width: 75px; height: 75px; padding: 10px; border: 1px solid rgba(127,127,127,.52); border-radius: 50%; background: rgba(29,29,29,.96); transform: translate(-50%,-50%); transition: border-color .14s, background .14s; }
+    .wheel-slot:hover, .wheel-slot.active { border: 2px solid #f17605; background: rgba(43,31,22,.98); }
+    .wheel-slot.has-sub::after { content: ''; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; border-radius: 50%; background: #f17605; box-shadow: 0 0 7px rgba(241,118,5,.5); transform: translate(-50%,-50%) translate(var(--sub-dot-x), var(--sub-dot-y)); pointer-events: none; }
+    .wheel-label { position: absolute; z-index: 3; color: #e6e8eb; transform: translate(-50%,-50%); font: 10px ui-monospace, monospace; white-space: nowrap; pointer-events: none; }
+    .wheel-label.active { color: #f17605; font-weight: 700; }
+    .sub-wheel-layer { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+    .sub-wheel-guide { position: absolute; height: 1px; transform-origin: left center; background: repeating-linear-gradient(90deg, rgba(241,118,5,.82) 0 7px, transparent 7px 12px); opacity: 0; transition: opacity .14s ease; }
+    .sub-wheel-layer.open .sub-wheel-guide { opacity: .85; }
+    .sub-wheel-slot { position: absolute; width: 58px; height: 58px; padding: 7px; border: 1px solid rgba(127,127,127,.52); border-radius: 50%; background: rgba(29,29,29,.96); opacity: 0; pointer-events: none; transform: translate(-50%,-50%) scale(.45); transition: opacity .14s ease, transform .16s cubic-bezier(.2,.8,.2,1), border-color .14s, background .14s; }
+    .sub-wheel-layer.open .sub-wheel-slot { opacity: 1; pointer-events: auto; transform: translate(-50%,-50%) scale(1); }
+    .sub-wheel-slot:hover, .sub-wheel-slot.active { border: 2px solid #f17605; background: rgba(43,31,22,.98); }
+    .sub-wheel-slot img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
+    .sub-wheel-label { position: absolute; width: 90px; color: #d7d9dc; font-size: 9px; text-align: center; opacity: 0; transform: translate(-50%,0); transition: opacity .14s ease; pointer-events: none; }
+    .sub-wheel-layer.open .sub-wheel-label { opacity: 1; }
+    .sub-wheel-label.active { color: #f17605; font-weight: 700; }
+    .wheel-slot img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
+    .wheel-center { position: absolute; inset: 50% auto auto 50%; z-index: 2; width: 36px; height: 36px; border: 2px solid #4774b8; border-radius: 50%; color: transparent; background: #171b1f; box-shadow: inset 0 0 0 7px #20262b; transform: translate(-50%,-50%); font: 0/0 a; }
+    .wheel-center::after { content: ''; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; border-radius: 50%; background: #f17605; transform: translate(-50%,-50%); }
+    .viewport-head { position: absolute; top: 35px; left: 76px; z-index: 2; color: #e3e5e8; }
+    .viewport-head strong { color: #ef9a56; }
+    .brush-library-hint { position: absolute; top: 45%; left: 50%; z-index: 2; display: flex; min-width: 220px; flex-direction: column; align-items: center; gap: 6px; color: #a8a8a8; font-size: 16px; letter-spacing: .02em; text-align: center; transform: translate(-50%,-50%); opacity: 1; transition: opacity .16s ease; pointer-events: none; }
+    .brush-library-hint img { position: relative; z-index: 1; display: block; width: 62px; height: 62px; object-fit: contain; opacity: .92; filter: drop-shadow(0 6px 12px rgba(0,0,0,.38)); animation: brush-hint-click 2.2s ease-in-out infinite; }
+    .brush-library-hint span { display: block; line-height: 1.2; animation: brush-hint-text 2.2s ease-in-out infinite; }
+    .brush-library-hint.hidden { opacity: 0; }
+    .brush-library-hint.hidden img, .brush-library-hint.hidden span { animation-play-state: paused; }
+    @keyframes brush-hint-click { 0%,24%,55%,100% { transform: scale(1); } 36% { transform: scale(.9); } 45% { transform: scale(1.04); } }
+    @keyframes brush-hint-text { 0%,25%,60%,100% { color: #a8a8a8; } 40% { color: #e1e1e1; } }
+    .viewport-gizmo { position: absolute; top: 10px; right: 12px; z-index: 6; width: 54px; height: 54px; }
+    .viewport-front { width: 54px; height: 54px; display: grid; place-items: center; }
+    .viewport-front img { display: block; width: 54px; height: 54px; object-fit: contain; }
+    .axis { position: absolute; display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; font: 10px/1 ui-monospace, monospace; font-weight: 700; }
+    .axis-z { top: 0; left: 19px; color: #fff; background: #2878c8; }
+    .axis-y { top: 19px; left: 19px; color: #101820; background: #8ac926; }
+    .axis-x { top: 19px; right: 0; color: #fff; background: #d83b52; }
+    .axis-line { position: absolute; transform-origin: left center; height: 2px; }
+    .axis-line-z { top: 27px; left: 27px; width: 19px; transform: rotate(-90deg); background: #2878c8; }
+    .axis-line-x { top: 27px; left: 27px; width: 19px; background: #d83b52; }
+    .viewport-gizmo-tools { position: absolute; top: 65px; right: 4px; display: grid; gap: 7px; justify-items: center; width: 28px; }
+    .viewport-gizmo-tool { display: grid; place-items: center; width: 24px; height: 24px; color: #e1e3e6; font-size: 17px; line-height: 1; }
+    .viewport-gizmo-tool img { width: 17px; height: 17px; object-fit: contain; opacity: .9; }
+    .blender-model { display: none; }
+    .blender-model::before, .blender-model::after { content: none; }
+    .blender-viewport .blender-model { filter: none; }
+    .blender-viewport.wheel-open .blender-model { visibility: hidden; }
+    .viewport-head::after { content: '  •  Sculpt-Wheel active'; color: #e9823e; }
+    .section#workspace { scroll-margin-top: 78px; }
+    .viewport-status { position: absolute; bottom: 72px; left: 12px; color: #aeb4bc; }
+    .blender-side { display: grid; grid-template-rows: 210px 1fr; border-left: 1px solid #121212; background: #202020; transform: translateY(-31px); height: calc(100% + 31px); }
+    .blender-side .blender-panel:nth-child(2) { display: flex; align-items: normal; }
+    .blender-side .blender-panel:nth-child(2) > .brush-properties { width: 100%; }
+    .sculpt-panel { position: absolute; top: 12px; right: 14px; z-index: 3; width: 174px; padding: 8px; border: 1px solid #4b535b; border-radius: 4px; background: rgba(42,47,52,.96); box-shadow: 0 8px 20px rgba(0,0,0,.3); }
+    .sculpt-panel-title { padding-bottom: 7px; border-bottom: 1px solid #555d65; color: #f3a15e; font-weight: 700; }
+    .sculpt-panel-row { display: flex; justify-content: space-between; padding: 5px 2px; color: #bfc5ca; }
+    .sculpt-panel-value { color: #f2f3f4; }
+    .blender-panel { overflow: hidden; border-bottom: 1px solid #111315; }
+    .blender-panel-title { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: #242424; color: #f1f1f1; font-weight: 700; }
+    .outliner-header { display: flex; align-items: center; gap: 7px; height: 30px; padding: 4px 7px; background: #242424; border-bottom: 0; }
+    .outliner-header img, .outliner-icon { width: 16px; height: 16px; object-fit: contain; image-rendering: auto; }
+    .outliner-search { display: flex; align-items: center; flex: 1; height: 21px; padding: 0 6px; border: 1px solid #121212; border-radius: 3px; background: #191919; color: #929292; font-size: 9px; }
+    .outliner-filter { width: 15px; height: 15px; opacity: .8; }
+    .outliner-row { display: flex; align-items: center; gap: 5px; min-height: 27px; padding: 3px 8px; color: #b9bdc3; }
+    .outliner-row.active { color: #fff; background: #383838; }
+    .outliner-row span { display: inline-flex; align-items: center; color: #e79a55; margin-right: 2px; }
+    .outliner-row .outliner-actions { margin-left: auto; display: flex; gap: 8px; }
+    .outliner-row .outliner-actions img { width: 13px; height: 13px; opacity: .88; }
+    .outliner-row.nested { padding-left: 27px; }
+    .brush-properties { display: grid; grid-template-columns: 28px 1fr; min-height: 0; }
+    .property-tabs { display: grid; align-content: start; gap: 8px; padding: 9px 5px; border-right: 1px solid #141414; background: #1d1d1d; }
+    .property-tab { width: 18px; height: 18px; object-fit: contain; opacity: .82; }
+    .property-tab.active { opacity: 1; }
+    .brush-properties-main { min-width: 0; overflow: hidden; }
+    .properties-search { display: flex; align-items: center; height: 28px; padding: 0 8px; border-bottom: 1px solid #141414; background: #222222; color: #999; font-size: 9px; }
+    .brush-asset-card { margin: 9px; padding: 8px; border: 1px solid #383838; border-radius: 3px; background: #252525; }
+    .brush-asset-title, .brush-section-title { display: flex; align-items: center; color: #dfe2e5; font-weight: 700; }
+    .brush-asset-title { justify-content: flex-start; gap: 4px; }
+    .brush-section-title { justify-content: space-between; }
+    .brush-asset-preview { display: grid; place-items: center; height: 120px; margin-top: 7px; background: #1b1b1b; }
+    .brush-asset-preview img { width: 100px; height: 100px; object-fit: contain; }
+    .brush-section { margin: 0 9px 7px; border: 1px solid #383838; border-radius: 3px; background: #252525; }
+    .brush-section-title { padding: 6px 8px; font-size: 10px; }
+    .brush-setting-row { display: flex; align-items: center; justify-content: space-between; gap: 5px; padding: 4px 8px; color: #aeb6be; font-size: 9px; }
+    .brush-setting-value { padding: 3px 5px; border: 1px solid #494949; border-radius: 3px; color: #e6e6e6; background: #222222; }
+    .property-row { display: flex; justify-content: space-between; margin: 9px 10px; color: #aeb3ba; }
+    .property-value { padding: 3px 6px; border: 1px solid #494949; border-radius: 3px; color: #e0e2e5; background: #222222; }
+    .brush-shelf { position: absolute; right: 0; bottom: 0; left: 0; z-index: 4; box-sizing: border-box; display: flex; align-items: center; gap: 4px; height: 64px; min-height: 64px; padding: 5px 8px; border-top: 1px solid #121212; border-bottom: 1px solid #121212; background: rgba(27,27,27,.98); overflow: hidden; }
+    .brush-shelf-tile { display: grid; place-items: center; width: 47px; height: 52px; padding: 0; border: 0; border-radius: 3px; background: transparent; }
+    .brush-shelf-tile img { display: block; width: 100%; height: 100%; box-sizing: border-box; object-fit: contain; border: 1px solid #373737; border-radius: 3px; background: transparent; }
+    .brush-shelf-tile.active img { border: 2px solid #e9823e; box-shadow: 0 0 0 1px rgba(233,130,62,.3); }
+    .brush-shelf-tile:last-child { display: none; }
+    .features-showcase { background: #09090a; }
+    .feature-mosaic { display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); column-gap: 16px; row-gap: 12px; }
+    .sw-feature-card { position: relative; min-height: 360px; overflow: hidden; border: 1px solid rgba(255,255,255,.13); border-radius: 18px; background: #111112; box-shadow: inset 0 1px rgba(255,255,255,.025), 0 22px 55px rgba(0,0,0,.2); }
+    .sw-feature-card:nth-child(2), .sw-feature-card:nth-child(4) { background: #151515; }
+    .sw-feature-card:nth-child(1) { grid-column: span 11; height: 360px; min-height: 360px; align-self: stretch; }
+    .sw-feature-card:nth-child(2) { grid-column: span 9; height: 360px; min-height: 360px; align-self: stretch; }
+    .sw-feature-card:nth-child(3) { grid-column: span 8; min-height: 292px; }
+    .sw-feature-card:nth-child(4) { grid-column: span 12; min-height: 292px; }
+    .sw-feature-index { position: absolute; top: 22px; right: 24px; color: #686868; font: 600 10px/1.2 "CG Geist Mono", monospace; letter-spacing: .17em; text-transform: uppercase; }
+    .sw-feature-inner { position: relative; z-index: 2; display: grid; height: 100%; min-height: inherit; align-items: center; gap: 26px; padding: 44px 34px 32px; }
+    .sw-feature-card:nth-child(1) .sw-feature-inner, .sw-feature-card:nth-child(2) .sw-feature-inner, .sw-feature-card:nth-child(4) .sw-feature-inner { grid-template-columns: minmax(0, .95fr) minmax(220px, 1.05fr); }
+    .sw-feature-card:nth-child(3) .sw-feature-inner { grid-template-rows: auto 1fr; align-items: start; }
+    .sw-feature-card:nth-child(1) .sw-feature-copy, .sw-feature-card:nth-child(2) .sw-feature-copy, .sw-feature-card:nth-child(4) .sw-feature-copy { align-self: start; }
+    .sw-feature-card:nth-child(3) .sw-feature-inner, .sw-feature-card:nth-child(4) .sw-feature-inner { padding-top: 36px; padding-bottom: 26px; }
+    .sw-feature-card:nth-child(3) .sw-feature-inner { gap: 16px; }
+    .sw-feature-card:nth-child(3) .sw-feature-visual { min-height: 64px; }
+    .sw-feature-card:nth-child(3) h3 { font-size: clamp(23px,1.9vw,29px); white-space: nowrap; }
+    .sw-feature-copy { max-width: 390px; }
+    .sw-feature-card .sw-feature-kicker { margin: 0 0 12px; color: var(--orange); font-family: "Poppins", monospace; font-size: 12px; font-weight: 300; line-height: 1.2; letter-spacing: .13em; text-transform: uppercase; }
+    .sw-feature-card h3 { margin: 0 0 14px; color: #f7f5f1; font-family: "Poppins", sans-serif; font-size: clamp(24px, 2.1vw, 32px); font-weight: 600; line-height: 1.08; letter-spacing: -.035em; }
+    .sw-feature-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .sw-feature-visual { position: relative; min-width: 0; min-height: 230px; }
+    .sw-editor-feature-card { grid-column: 1 / -1; min-height: 390px; margin-top: 0; }
+    .sw-editor-feature-card .sw-feature-inner { grid-template-columns: minmax(250px,.72fr) minmax(560px,1.28fr); }
+    .sw-editor-feature-card .sw-feature-copy { display: flex; align-self: stretch; flex-direction: column; justify-content: center; }
+    .sw-editor-feature-card .sw-feature-visual { min-height: 290px; }
+    .editor-dnd-demo { position: relative; display: grid; grid-template-columns: minmax(270px,.95fr) minmax(250px,1.05fr); gap: 18px; height: 290px; overflow: visible; }
+    .editor-dnd-panel { position: relative; min-width: 0; overflow: hidden; }
+    .editor-dnd-wheel-panel { overflow: visible; border: 0; border-radius: 0; background: transparent; }
+    .editor-dnd-wheel-panel > .editor-dnd-bar { display: none; }
+    .editor-dnd-library-panel { align-self: center; justify-self: center; width: 227px; height: 256px; border: 1px solid #34373b; border-radius: 7px; background: #15171a; }
+    .editor-dnd-bar { position: relative; z-index: 5; height: 29px; border-bottom: 1px solid #303338; background: #1d1f22; color: #b8babd; font: 9px/29px "CG Geist Mono", monospace; letter-spacing: .04em; text-indent: 10px; }
+    .editor-dnd-wheel { position: absolute; left: 50%; top: 50%; width: 230px; height: 230px; transform: translate(-50%,-50%); }
+    .editor-dnd-wheel::before { content: ""; position: absolute; inset: 33px; border: 1px solid rgba(255,255,255,.08); border-radius: 50%; }
+    .editor-dnd-center { position: absolute; left: 50%; top: 50%; z-index: 3; width: 24px; height: 24px; border: 2px solid #4774b8; border-radius: 50%; background: #1e1e1e; transform: translate(-50%,-50%); }
+    .editor-dnd-center::after { content: ""; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); transform: translate(-50%,-50%); }
+    .editor-dnd-ray { position: absolute; left: 50%; top: 50%; width: 77px; height: 1px; transform: rotate(var(--a)); transform-origin: left center; background: repeating-linear-gradient(90deg, rgba(255,101,20,.72) 0 5px, transparent 5px 9px); }
+    .editor-dnd-slot { position: absolute; left: 50%; top: 50%; z-index: 2; display: grid; width: 48px; height: 48px; place-items: center; padding: 5px; border: 1px solid #4b4e52; border-radius: 50%; background: #202225; transform: translate(-50%,-50%) rotate(var(--a)) translateY(-89px) rotate(calc(var(--a) * -1)); box-shadow: 0 8px 18px rgba(0,0,0,.34); transition: border-color .18s ease, background .18s ease, box-shadow .18s ease; }
+    .editor-dnd-slot::before { content: "+"; color: #777c82; font: 500 19px/1 "Poppins", sans-serif; transition: opacity .15s ease; }
+    .editor-dnd-slot img { position: absolute; inset: 5px; display: block; width: calc(100% - 10px); height: calc(100% - 10px); object-fit: contain; opacity: 0; transform: scale(1); transition: none; }
+    .editor-dnd-slot.is-filled { border-color: #5b5f64; background: #242629; }
+    .editor-dnd-slot.is-filled::before { opacity: 0; }
+    .editor-dnd-slot.is-filled img { opacity: 1; transform: scale(1); }
+    .editor-dnd-slot.is-target { border-color: var(--orange); background: rgba(255,101,20,.11); box-shadow: 0 0 0 2px rgba(255,101,20,.12), 0 0 18px rgba(255,101,20,.25); }
+    .editor-dnd-library-grid { display: grid; grid-template-columns: repeat(3,62px); column-gap: 8px; row-gap: 8px; padding: 12px; justify-content: start; align-content: center; }
+    .editor-dnd-library-item { display: grid; width: 62px; height: 62px; place-items: center; padding: 6px; border: 1px solid #393c40; border-radius: 5px; background: #242629; cursor: grab; transition: border-color .18s ease, background .18s ease, transform .18s ease; }
+    .editor-dnd-library-item:hover { border-color: #5a5e63; background: #292c30; transform: translateY(-1px); }
+    .editor-dnd-library-item:active { cursor: grabbing; }
+    .editor-dnd-library-item.is-dragging { border-color: rgba(255,101,20,.72); background: rgba(255,101,20,.1); }
+    .editor-dnd-library-item img { display: block; width: 46px; height: 46px; object-fit: contain; pointer-events: none; user-select: none; }
+    .editor-dnd-drag { position: absolute; left: 0; top: 0; z-index: 20; display: grid; width: 48px; height: 48px; place-items: center; padding: 5px; border: 2px solid var(--orange); border-radius: 50%; background: #242629; opacity: 0; visibility: hidden; pointer-events: none; box-shadow: 0 10px 24px rgba(0,0,0,.55), 0 0 18px rgba(255,101,20,.3); will-change: transform, opacity; }
+    .editor-dnd-drag img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .fm-wheel { position: absolute; left: 50%; top: 50%; width: 230px; height: 230px; transform: translate(-50%,-50%); }
+    .fm-wheel::before { content: ""; position: absolute; inset: 33px; border: 1px solid rgba(255,255,255,.08); border-radius: 50%; }
+    .fm-center { position: absolute; left: 50%; top: 50%; z-index: 3; width: 24px; height: 24px; border: 2px solid #4774b8; border-radius: 50%; background: #1e1e1e; transform: translate(-50%,-50%); }
+    .fm-center::after { content: ""; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); transform: translate(-50%,-50%); }
+    .fm-ray { position: absolute; left: 50%; top: 50%; width: 77px; height: 1px; transform: rotate(var(--a)); transform-origin: left center; background: repeating-linear-gradient(90deg, rgba(241,118,5,.72) 0 5px, transparent 5px 9px); }
+    .fm-brush { position: absolute; left: 50%; top: 50%; z-index: 2; display: grid; width: 48px; height: 48px; place-items: center; padding: 5px; border: 1px solid #555; border-radius: 50%; background: #242424; transform: translate(-50%,-50%) rotate(var(--a)) translateY(-89px) rotate(calc(var(--a) * -1)); box-shadow: 0 8px 18px rgba(0,0,0,.34); }
+    .fm-brush img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .fm-brush.active { border: 2px solid var(--orange); }
+    .fm-brush.has-sub::after { content: ""; position: absolute; right: -11px; top: 50%; width: 4px; height: 4px; border-radius: 50%; background: var(--orange); transform: translateY(-50%); }
+    .sub-feature-visual { position: relative; min-width: 0; min-height: 230px; }
+    .sub-feature-wheel { position: absolute; left: 25%; top: 50%; width: 230px; height: 230px; transform: translate(-50%,-50%); }
+    .sub-feature-main-brush { position: absolute; left: 50%; top: 50%; z-index: 3; display: grid; width: 48px; height: 48px; place-items: center; padding: 5px; border: 2px solid var(--orange); border-radius: 50%; background: #242424; transform: translate(-50%,-50%); box-shadow: 0 0 14px rgba(241,118,5,.18), 0 8px 18px rgba(0,0,0,.34); }
+    .sub-feature-main-brush img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .sub-feature-main-brush::after { content: ""; position: absolute; right: -11px; top: 50%; width: 4px; height: 4px; border-radius: 50%; background: var(--orange); transform: translateY(-50%); box-shadow: 0 0 8px rgba(241,118,5,.55); }
+    .sub-feature-ray { position: absolute; left: 50%; top: 50%; width: 77px; height: 1px; opacity: 1; transform: rotate(var(--a)) scaleX(1); transform-origin: left center; background: repeating-linear-gradient(90deg, rgba(241,118,5,.72) 0 5px, transparent 5px 9px); }
+    .sub-feature-brush { position: absolute; left: 50%; top: 50%; z-index: 2; display: grid; width: 41px; height: 41px; place-items: center; padding: 4px; border: 1px solid #555; border-radius: 50%; background: #242424; opacity: 1; pointer-events: none; transform: translate(-50%,-50%) rotate(var(--a)) translateY(-89px) rotate(calc(var(--a) * -1)); box-shadow: 0 8px 18px rgba(0,0,0,.34); }
+    .sub-feature-brush img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    @keyframes sub-feature-brush-flow {
+      0%, 10%, 88%, 100% { opacity: 0; transform: translate(-50%,-50%) scale(.4); }
+      28%, 72% { opacity: 1; transform: translate(-50%,-50%) rotate(var(--a)) translateY(-89px) rotate(calc(var(--a) * -1)); }
+    }
+    @keyframes sub-feature-ray-flow {
+      0%, 10%, 88%, 100% { opacity: .15; transform: rotate(var(--a)) scaleX(0); }
+      28%, 72% { opacity: 1; transform: rotate(var(--a)) scaleX(1); }
+    }
+    .fm-editor { position: absolute; inset: 24px 4px 4px; display: grid; grid-template-rows: 62px 1fr; gap: 12px; }
+    .fm-library { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border: 1px solid #383838; border-radius: 8px; background: #1d1d1d; }
+    .fm-library img { width: 38px; height: 38px; object-fit: contain; border: 1px solid #393939; border-radius: 5px; background: #262626; }
+    .preset-mini { position: absolute; inset: 0 4px auto; padding: 9px 10px; border: 1px solid #383b3f; border-radius: 8px; background: #191b1e; box-shadow: 0 12px 28px rgba(0,0,0,.22); }
+    .preset-mini-head { display: flex; min-height: 10px; align-items: center; justify-content: space-between; margin-bottom: 6px; color: #858a90; font: 600 8px/1 "CG Geist Mono", monospace; letter-spacing: .11em; text-transform: uppercase; }
+    .preset-mini-saved { display: inline-flex; height: 10px; align-items: center; gap: 4px; color: #7fbe83; }
+    .preset-mini-saved-dot { display: block; flex: 0 0 5px; width: 5px; height: 5px; border-radius: 50%; background: #0eec1d; box-shadow: 0 0 7px rgba(127,190,131,.45); animation: preset-saved-blink 1.6s ease-in-out infinite; }
+    .preset-mini-saved-label { display: block; height: 8px; font: inherit; line-height: 8px; transform: translateY(1px); }
+    @keyframes preset-saved-blink { 0%,100% { opacity: .3; box-shadow: 0 0 3px rgba(127,190,131,.25); } 50% { opacity: 1; box-shadow: 0 0 9px rgba(127,190,131,.75); } }
+    .preset-mini-list { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+    .preset-mini-item { display: flex; min-width: 0; align-items: center; justify-content: center; gap: 5px; padding: 5px 4px; border: 1px solid #34373a; border-radius: 5px; color: #8e9399; background: #222427; font: 600 7px/1.1 "CG Geist Mono", monospace; letter-spacing: .06em; text-transform: uppercase; }
+    .preset-mini-item img { width: 20px; height: 20px; object-fit: contain; opacity: .72; }
+    .preset-mini-item.active { border-color: var(--orange); color: #fff; background: rgba(241,118,5,.1); box-shadow: 0 0 14px rgba(241,118,5,.12); }
+    .preset-mini-item.active img { opacity: 1; }
+    .fm-editor-wheel { position: relative; width: 174px; height: 154px; margin: 0 auto; }
+    .fm-editor-wheel::before { content: ""; position: absolute; left: 50%; top: 50%; width: 112px; height: 112px; border: 1px dashed #454545; border-radius: 50%; transform: translate(-50%,-50%); }
+    .fm-empty-slot { position: absolute; left: 50%; top: 50%; width: 32px; height: 32px; border: 1px solid #424242; border-radius: 8px; background: #181818; transform: translate(-50%,-50%) rotate(var(--a)) translateY(-58px) rotate(calc(var(--a) * -1)); }
+    .fm-empty-slot.filled { padding: 3px; border-color: var(--orange); }
+    .fm-empty-slot img { width: 100%; height: 100%; object-fit: contain; }
+    .fm-drop-path { position: absolute; left: 52%; top: 49px; z-index: 4; width: 1px; height: 62px; border-left: 1px dashed var(--orange); transform: rotate(18deg); transform-origin: top; }
+    .fm-drop-path::after { content: ""; position: absolute; left: -3px; bottom: -2px; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 12px rgba(255,101,20,.75); }
+    .fm-native { position: absolute; inset: 28px 0 0; display: grid; grid-template-columns: 158px 32px minmax(150px, 1fr); align-items: center; }
+    .fm-native .fm-wheel { position: relative; left: auto; top: auto; width: 150px; height: 150px; transform: none; }
+    .fm-native .fm-wheel::before { inset: 29px; }
+    .fm-native .fm-brush { width: 38px; height: 38px; padding: 4px; transform: translate(-50%,-50%) rotate(var(--a)) translateY(-57px) rotate(calc(var(--a) * -1)); }
+    .fm-native .fm-ray { width: 45px; }
+    .fm-native-transfer { position: relative; height: 1px; border-top: 1px dashed var(--orange); }
+    .fm-native-transfer::before { content: ""; position: absolute; right: -1px; top: -3px; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); }
+    .fm-active-brush { padding: 12px; border: 1px solid #414141; border-radius: 8px; background: #202020; }
+    .fm-active-brush small { display: block; margin-bottom: 8px; color: #777; font: 9px "CG Geist Mono", monospace; letter-spacing: .1em; text-transform: uppercase; }
+    .fm-active-row { display: flex; align-items: center; gap: 12px; padding: 9px; border: 1px solid rgba(255,101,20,.55); border-radius: 5px; background: #292929; }
+    .fm-active-row img { width: 54px; height: 54px; object-fit: contain; }
+    .fm-active-row strong { display: block; color: #fff; font-size: 13px; }
+    .fm-active-row span { color: #bbb; font-size: 11px; }
+    .bridge-visual { position: relative; width: 100%; min-height: 230px; }
+    .bridge-stage { position: absolute; inset: 0; display: grid; grid-template-columns: 126px minmax(68px,1fr) 142px; align-items: center; }
+    .bridge-panel { display: flex; flex-direction: column; gap: 9px; padding: 13px 11px; border-radius: 9px; background: rgba(32,32,32,.9); box-shadow: 0 13px 30px rgba(0,0,0,.24); }
+    .bridge-wheel-panel { border: 1px solid rgba(241,118,5,.48); background: rgba(241,118,5,.075); }
+    .bridge-blender-panel { border: 1px solid #41454a; background: linear-gradient(145deg,#24272a,#1b1d20); }
+    .bridge-label { color: #8b9096; font: 600 8px/1.25 "CG Geist Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
+    .bridge-wheel-panel .bridge-label { color: var(--orange); }
+    .bridge-brush-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 5px; }
+    .bridge-brush { display: grid; aspect-ratio: 1; place-items: center; padding: 4px; border: 1px solid rgba(255,255,255,.08); border-radius: 4px; background: rgba(255,255,255,.045); }
+    .bridge-brush img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .bridge-brush.active { border-color: var(--orange); background: rgba(241,118,5,.18); box-shadow: 0 0 13px rgba(241,118,5,.18); }
+    .bridge-status { color: #858a90; font: 600 8px/1.2 "CG Geist Mono", monospace; letter-spacing: .1em; text-transform: uppercase; }
+    .bridge-status strong { color: var(--orange); font-weight: 600; }
+    .bridge-link { display: flex; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 7px; }
+    .bridge-link-label { color: #777c82; font: 600 7px/1.2 "CG Geist Mono", monospace; letter-spacing: .16em; text-transform: uppercase; white-space: nowrap; }
+    .bridge-line { position: relative; width: 100%; height: 1px; background: linear-gradient(90deg,var(--orange),rgba(241,118,5,.22),var(--orange)); }
+    .bridge-pulse { position: absolute; left: 0; top: 50%; width: 7px; height: 7px; border-radius: 50%; background: #fff; box-shadow: 0 0 11px 2px rgba(241,118,5,.8); transform: translate(-50%,-50%); animation: bridge-sync 2.5s ease-in-out infinite; }
+    .bridge-link-state { color: var(--orange); font: 600 7px/1.2 "CG Geist Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
+    @keyframes bridge-sync { 0% { left: 0; opacity: .35; } 20%,80% { opacity: 1; } 100% { left: 100%; opacity: .35; } }
+    .bridge-mode { display: flex; align-items: center; gap: 5px; color: #b6bac0; font: 600 8px/1.2 "CG Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .bridge-mode::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 7px rgba(241,118,5,.7); }
+    .bridge-active-brush { display: flex; align-items: center; gap: 9px; padding: 8px; border: 1px solid rgba(241,118,5,.58); border-radius: 5px; background: #292b2e; }
+    .bridge-active-brush img { width: 43px; height: 43px; object-fit: contain; }
+    .bridge-active-copy { min-width: 0; }
+    .bridge-active-copy strong, .bridge-active-copy span { display: block; }
+    .bridge-active-copy strong { color: #fff; font-size: 12px; line-height: 1.25; }
+    .bridge-active-copy span { margin-top: 3px; color: #a4a8ad; font-size: 9px; line-height: 1.25; }
+    .sw-feature-card:nth-child(4) .sw-feature-copy { max-width: 330px; }
+    .sw-feature-card:nth-child(4) .sw-feature-inner { grid-template-columns: minmax(220px,.88fr) minmax(300px,1.12fr); gap: 28px; }
+    .workflow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .step { position: relative; min-height: 255px; padding: 27px; border: 1px solid rgba(255,255,255,.12); border-radius: 13px; background: #111113; box-shadow: inset 0 1px rgba(255,255,255,.025); }
+    .step::before { content: "0" counter(step); counter-increment: step; display: block; color: var(--orange); font: 600 10px/1.2 "CG Geist Mono", monospace; letter-spacing: .15em; }
+    .workflow { counter-reset: step; }
+    .step h3 { margin: 20px 0 9px; color: #f7f5f1; font-size: 21px; line-height: 1.15; }
+    .step p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .workflow-cue { display: grid; width: 58px; height: 58px; margin-top: 24px; place-items: center; border: 1px solid rgba(255,101,20,.48); border-radius: 10px; background: rgba(255,101,20,.07); }
+    .workflow-cue img { display: block; width: 38px; height: 38px; object-fit: contain; }
+    .workflow-keycap { display: inline-grid; min-width: 42px; height: 30px; place-items: center; border: 1px solid #555a60; border-radius: 5px; color: #fff; background: #292b2e; font: 700 9px/1 "CG Geist Mono", monospace; box-shadow: inset 0 -2px #141517; }
+    .how-section { background: #0b0b0c; }
+    .how-section .section-head { align-items: end; }
+    .how-section .section-head h2 span { color: var(--orange); }
+    .how-steps { position: relative; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
+    .how-steps::before { content: ""; position: absolute; top: 45px; left: calc(16.666% + 18px); right: calc(16.666% + 18px); z-index: 0; height: 1px; background: repeating-linear-gradient(90deg,rgba(255,101,20,.62) 0 8px,transparent 8px 14px); }
+    .how-step { position: relative; z-index: 1; display: flex; min-width: 0; min-height: 430px; flex-direction: column; padding: 30px 26px 26px; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; background: linear-gradient(180deg,#141415 0%,#101011 100%); box-shadow: inset 0 1px rgba(255,255,255,.025); }
+    .how-step-copy { display: flex; flex: 1; flex-direction: column; }
+    .how-step-num { display: grid; width: 32px; height: 32px; margin-bottom: 22px; place-items: center; border: 1px solid rgba(255,101,20,.75); border-radius: 50%; color: var(--orange); background: #141415; box-shadow: 0 0 0 7px #141415; font: 700 9px/1 "CG Geist Mono", monospace; letter-spacing: .04em; }
+    .how-step h3 { margin: 0 0 12px; color: #f7f5f1; font-size: clamp(22px,2vw,27px); line-height: 1.1; letter-spacing: -.03em; }
+    .how-step p { margin: 0 0 25px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .how-step-visual { display: grid; min-height: 145px; margin-top: auto; place-items: end stretch; }
+    .how-ui { width: 100%; padding: 13px; border: 1px solid #393c40; border-radius: 8px; background: #191b1e; box-shadow: 0 16px 32px rgba(0,0,0,.24); }
+    .how-ui-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 13px; color: #8e949a; font: 600 9px/1.2 "CG Geist Mono", monospace; letter-spacing: .11em; text-transform: uppercase; }
+    .how-ui-head strong { color: #dadddf; font-weight: 600; }
+    .how-ui-row { display: flex; min-height: 38px; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 10px; border: 1px solid #303338; border-radius: 5px; color: #b8bcc1; background: #222428; font-size: 11px; }
+    .how-ui-row + .how-ui-row { margin-top: 7px; }
+    .how-ui-row.active { border-color: rgba(255,101,20,.72); background: rgba(255,101,20,.08); color: #fff; }
+    .how-ui-chip { flex: none; padding: 4px 7px; border-radius: 4px; color: var(--orange); background: rgba(255,101,20,.11); font: 600 8px/1 "CG Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .how-ui-code { overflow: hidden; color: #d6d9dc; font: 10px/1.2 "CG Geist Mono", monospace; letter-spacing: .05em; text-overflow: ellipsis; white-space: nowrap; }
+    .how-ui-action { display: inline-flex; min-height: 29px; align-items: center; justify-content: center; padding: 0 10px; border: 1px solid var(--orange); border-radius: 4px; color: #fff; background: var(--orange); font: 700 8px/1 "CG Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .how-ui-status { display: inline-flex; align-items: center; gap: 6px; color: #cbd0d4; font: 600 9px/1 "CG Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .how-ui-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 9px rgba(255,101,20,.6); }
+    .how-key { display: inline-grid; min-width: 42px; height: 32px; place-items: center; border: 1px solid #4a4e53; border-radius: 5px; color: #fff; background: #27292d; font: 700 11px/1 "CG Geist Mono", monospace; box-shadow: inset 0 -2px #151619; }
+    .install-card { display: flex; align-items: center; justify-content: space-between; gap: 30px; padding: 42px; border: 1px solid var(--line); border-radius: 11px; background: #111113; box-shadow: none; }
+    .install-card h2 { max-width: 650px; }
+    .install-card p { max-width: 530px; margin: 15px 0 0; color: var(--muted); font-size: 14px; }
+    footer { display: flex; justify-content: space-between; gap: 20px; padding: 26px 0 36px; color: var(--muted); font-size: 12px; }
+    .mono { font-family: "CG Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+    @media (max-width: 860px) {
+      .hero, .gallery { grid-template-columns: 1fr; }
+      .hero-copy, .hero > .visual { grid-column: 1; grid-row: auto; }
+      h1 { white-space: normal; }
+      .hero { min-height: auto; padding-top: 66px; }
+      .hero .visual { order: -1; }
+      .hero-wheel.wheel-ring { left: 50%; top: 50%; transform: translate(-50%,-50%) scale(.78); }
+      .feature-grid, .workflow { grid-template-columns: 1fr; }
+      .zb-workspace { grid-template-columns: 88px 1fr; }
+      .zb-right-panel { display: none; }
+      .blender-main { grid-template-columns: 1fr 180px; }
+      .blender-workbar, .blender-tool-settings { width: calc(100% - 180px); }
+      .blender-side { font-size: 9px; }
+      .zb-toolbar-group:nth-child(n+4) { display: none; }
+      .gallery figure:first-child { grid-row: auto; }
+      .editor-gallery .editor-gallery-main .media-frame { height: auto; min-height: 0; }
+      .experience-body { grid-template-columns: 1fr; }
+      .experience-copy { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+      .experience-screen { min-height: 480px; }
+      .editor-capability-card.span-3, .editor-capability-card.span-2, .editor-capability-card.span-4 { grid-column: span 6; }
+      .section-head { display: block; }
+      .section-head > p { margin-top: 18px; }
+      .install-card { display: block; }
+      .install-card .button { margin-top: 25px; }
+      .how-steps { grid-template-columns: 1fr; }
+      .how-steps::before { top: 45px; bottom: 45px; left: 42px; right: auto; width: 1px; height: auto; background: repeating-linear-gradient(180deg,rgba(255,101,20,.62) 0 8px,transparent 8px 14px); }
+      .how-step { min-height: 0; }
+    }
+    @media (max-width: 570px) {
+      .wrap { width: min(var(--max), calc(100% - 30px)); }
+      nav { height: 66px; }
+      .nav-links { display: none; }
+      .section { padding: 72px 0; }
+      .install-card { padding: 28px; }
+      .how-step { padding: 28px 24px 24px; }
+      footer { display: block; }
+      footer span { display: block; margin-top: 8px; }
+      .zb-left-shelf { grid-template-columns: 1fr; }
+      .demo-caption { display: block; }
+      .demo-caption span { display: block; margin-top: 6px; }
+      .blender-main { grid-template-columns: 1fr; }
+      .blender-workbar, .blender-tool-settings { width: 100%; }
+      .blender-side { display: none; }
+      .blender-model { width: 110px; height: 110px; }
+      .brush-shelf { height: 58px; gap: 3px; padding: 4px; }
+      .brush-shelf-tile { width: 38px; height: 42px; }
+      .viewport-head { left: 62px; }
+      .viewport-status { bottom: 66px; }
+      .bl-tool { width: 19px; height: 23px; font-size: 11px; }
+      .experience-toolbar { align-items: stretch; flex-direction: column; }
+      .experience-tabs { display: grid; grid-template-columns: 1fr 1fr; }
+      .experience-tab { justify-content: center; padding: 0 8px; }
+      .experience-autoplay { align-self: flex-start; }
+      .experience-copy { padding: 30px 24px; }
+      .experience-screen { min-height: 330px; padding: 10px; }
+      .experience-screen-note { right: 18px; bottom: 18px; }
+      .experience-footer { grid-template-columns: 1fr; }
+      .experience-footer div { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+      .experience-footer div:last-child { border-bottom: 0; }
+      .editor-capability-card { min-height: 450px; padding: 24px; }
+      .cap-visual { inset: auto; }
+      .editor-capability-card:nth-child(1), .editor-capability-card:nth-child(2), .editor-capability-card:nth-child(4) { display: flex; }
+      .editor-capability-card:nth-child(1) .cap-visual, .editor-capability-card:nth-child(2) .cap-visual, .editor-capability-card:nth-child(4) .cap-visual { height: 230px; margin-top: auto; }
+      .cap-editor { grid-template-columns: 1fr; }
+      .cap-editor-library, .cap-drag-path, .cap-drag-brush { display: none; }
+      .cap-native { grid-template-columns: 1fr; gap: 13px; }
+      .cap-native-wheel { width: 150px; height: 150px; }
+      .cap-native-wheel .cap-brush { transform: translate(-50%,-50%) rotate(var(--a)) translateX(70px) rotate(calc(-1 * var(--a))); }
+      .cap-native-transfer { width: 1px; height: 20px; margin: auto; border-top: 0; border-left: 1px dashed var(--orange); }
+      .cap-native-transfer::after { right: -6px; top: 7px; transform: rotate(90deg); }
+      .viewport-gizmo { right: 8px; }
+      .sculpt-panel { top: 10px; right: 8px; width: 142px; font-size: 9px; }
+      .blender-tool-settings span:nth-of-type(n+4), .blender-workbar span:nth-of-type(n+3) { display: none; }
+    }
+    @media (max-width: 900px) {
+      .feature-mosaic { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+      .sw-feature-card:nth-child(n) { grid-column: span 12; }
+      .sw-feature-card:nth-child(1) .sw-feature-inner, .sw-feature-card:nth-child(2) .sw-feature-inner, .sw-feature-card:nth-child(4) .sw-feature-inner { grid-template-columns: 1fr; }
+      .sw-feature-copy { max-width: 540px; }
+      .sw-feature-visual { min-height: 250px; }
+      .sub-feature-visual { min-height: 250px; }
+      .sw-editor-feature-card .sw-feature-inner { grid-template-columns: 1fr; }
+      .sw-editor-feature-card .sw-feature-visual { min-height: 290px; }
+      .fm-native { position: relative; inset: auto; grid-template-columns: 180px 44px minmax(170px, 1fr); max-width: 500px; margin: 0 auto; }
+    }
+    @media (max-width: 680px) {
+      .editor-dnd-demo { grid-template-columns: 1fr; height: 590px; }
+      .editor-dnd-panel { min-height: 278px; }
+      .editor-dnd-library-panel { width: 227px; height: 256px; min-height: 256px; }
+      .sw-editor-feature-card .sw-feature-visual { min-height: 590px; }
+    }
+    @media (max-width: 560px) {
+      .sw-feature-inner { padding: 48px 22px 24px; }
+      .sw-feature-card h3 { font-size: 25px; }
+      .sw-editor-feature-card .sw-feature-visual { min-height: 590px; }
+      .editor-dnd-library-grid { column-gap: 8px; row-gap: 8px; padding: 12px; }
+      .editor-dnd-library-item { width: 62px; height: 62px; padding: 6px; }
+      .editor-dnd-library-item img { width: 46px; height: 46px; }
+      .fm-native { grid-template-columns: 1fr; gap: 14px; justify-items: center; }
+      .fm-native-transfer { width: 1px; height: 28px; border-top: 0; border-left: 1px dashed var(--orange); }
+      .fm-native-transfer::before { right: -3px; top: auto; bottom: -1px; }
+      .fm-active-brush { width: 100%; }
+      .bridge-visual { min-height: 390px; }
+      .bridge-stage { grid-template-columns: 142px; grid-template-rows: auto 54px auto; justify-content: center; }
+      .bridge-link { width: 54px; justify-self: center; transform: rotate(90deg); }
+      .bridge-link-label, .bridge-link-state { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nav-shell">
+    <nav class="wrap" aria-label="Main navigation">
+      <a class="brand" href="#top"><img src="assets/icon.png" alt="" /><span>SCULPT<em>-WHEEL</em></span></a>
+
+
+      <div class="nav-links">
+        <a href="#workspace">Workspace</a>
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#workflow">Workflow</a>
+      </div>
+      <a class="nav-button" href="#install">Install guide</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="wrap hero">
+      <div class="hero-copy">
+        <p class="eyebrow hero-eyebrow">Blender sculpting add-on / v1.0.010</p>
+        <h1>Your Brushes,<br /><span>One gesture</span> Away.</h1>
+        <p class="lead">Sculpt-Wheel turns your sculpting toolkit into a fast, configurable radial workflow, so your hands stay on the model and your ideas keep moving.</p>
+        <div class="actions"><a class="button primary" href="#workspace">Get Sculpt-Wheel <span class="button-arrow">→</span></a><a class="button secondary" href="#workspace">Watch The Demo <span class="button-play">▶</span></a></div>
+        <div class="hero-features" aria-label="Sculpt-Wheel benefits">
+          <div class="hero-feature"><span class="hero-feature-icon"><img src="assets/Icon/orange_open_palm_outline_icon.png" alt="" /></span><strong>Fast access</strong><small>Open the wheel instantly</small></div>
+          <div class="hero-feature"><span class="hero-feature-icon"><img src="assets/Icon/orange_outline_lightning_bolt.png" alt="" /></span><strong>Practical control</strong><small>Keep brushes close</small></div>
+          <div class="hero-feature"><span class="hero-feature-icon"><img src="assets/Icon/orange_settings_sliders_icon.png" alt="" /></span><strong>Custom layouts</strong><small>Build your own flow</small></div>
+          <div class="hero-feature"><span class="hero-feature-icon"><img src="assets/Icon/orange_connected_node_network_icon.png" alt="" /></span><strong>Blender native</strong><small>Made for sculpt mode</small></div>
+        </div>
+        <div class="compat"><i></i> Built for Blender 4.3+ including Blender 5.x</div>
+      </div>
+      <div class="visual">
+        <div class="media-frame hero-media"><div class="hero-wheel-stage"><div class="hero-wheel">
+          <span class="hero-wheel-line" style="--angle:0deg"></span><span class="hero-wheel-line" style="--angle:45deg"></span><span class="hero-wheel-line" style="--angle:90deg"></span><span class="hero-wheel-line" style="--angle:135deg"></span><span class="hero-wheel-line" style="--angle:180deg"></span><span class="hero-wheel-line" style="--angle:225deg"></span><span class="hero-wheel-line" style="--angle:270deg"></span><span class="hero-wheel-line" style="--angle:315deg"></span>
+          <span class="hero-wheel-slot" style="--angle:0deg"><img src="assets/sculpt-wheel/brush-icons/default/Clay.png" alt="Clay" /></span><span class="hero-wheel-slot" style="--angle:45deg"><img src="assets/sculpt-wheel/brush-icons/default/Draw%20Sharp.png" alt="Draw Sharp" /></span><span class="hero-wheel-slot" style="--angle:90deg"><img src="assets/sculpt-wheel/brush-icons/default/Clay_Buildup.png" alt="Clay Buildup" /></span><span class="hero-wheel-slot" style="--angle:135deg"><img src="assets/sculpt-wheel/brush-icons/default/Move.png" alt="Move" /></span><span class="hero-wheel-slot" style="--angle:180deg"><img src="assets/sculpt-wheel/brush-icons/default/Blob.png" alt="Blob" /></span><span class="hero-wheel-slot" style="--angle:225deg"><img src="assets/sculpt-wheel/brush-icons/default/Inflate.png" alt="Inflate" /></span><span class="hero-wheel-slot" style="--angle:270deg"><img src="assets/sculpt-wheel/brush-icons/default/Crease_Sharp.png" alt="Crease" /></span><span class="hero-wheel-slot" style="--angle:315deg"><img src="assets/sculpt-wheel/brush-icons/default/Standard.png" alt="Standard" /></span>
+          <span class="hero-wheel-label" style="--angle:0deg">Clay</span><span class="hero-wheel-label" style="--angle:45deg">Draw Sharp</span><span class="hero-wheel-label" style="--angle:90deg">Clay Buildup</span><span class="hero-wheel-label" style="--angle:135deg">Move</span><span class="hero-wheel-label" style="--angle:180deg">Blob</span><span class="hero-wheel-label" style="--angle:225deg">Inflate</span><span class="hero-wheel-label" style="--angle:270deg">Crease</span><span class="hero-wheel-label" style="--angle:315deg">Standard</span>
+          <span class="hero-wheel-center"></span>
+        </div></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="workspace"><div class="wrap">
+      <div class="section-head"><div><div class="workspace-eyebrow">Try the Demo-Inside Blender</div><h2 class="workspace-title">One shortcut. Every brush.<br /><span>Stay in the flow.</span></h2></div><p>See Sculpt-Wheel in the environment you already know: a familiar Blender viewport with the radial brush workflow ready under Spacebar.</p></div>
+      <div class="blender-ui" role="img" aria-label="Blender-style 3D viewport with toolbar, brush shelf and outliner">
+        <div class="blender-topbar"><span class="blender-logo"><img class="ui-slot-icon" src="assets/sculpt-wheel/Blender_File.png" alt="" /> Blender 5.0</span><span class="blender-menu">File</span><span class="blender-menu">Edit</span><span class="blender-menu">Render</span><span class="blender-menu">Window</span><span class="blender-menu">Help</span></div>
+        <div class="blender-workbar"><strong><img class="ui-slot-icon" src="assets/sculpt-wheel/Scuplt_Mode.png" alt="" />Sculpt Mode ▾</strong><span>View</span><span>Select</span><span>Add</span><span>Mesh</span><span>Face Sets</span><span class="spacer"></span><span>◉ ◉ ◉</span></div>
+        <div class="blender-tool-settings"><b><img class="ui-slot-icon" src="assets/sculpt-wheel/Tool_Settings.png" alt="" />Draw</b><span>Size&nbsp; 100 px</span><span>Strength&nbsp; 0.500</span><span>Brush ▾</span><span>Texture ▾</span><span>Stroke ▾</span><span>Falloff ▾</span><span>Cursor ▾</span></div>
+        <div class="blender-main"><aside class="blender-tools"><span class="bl-tool active">✣</span><span class="bl-tool">⌖</span><span class="bl-tool">✥</span><span class="bl-tool">◒</span><span class="bl-tool">⌁</span><span class="bl-tool">◉</span><span class="bl-tool">◈</span><span class="bl-tool">✎</span><span class="bl-tool">⊕</span></aside><div class="blender-viewport"><div class="viewport-head">User Perspective<br /><strong>Clay</strong></div><div class="viewport-gizmo">Y</div><div class="blender-model"></div><div class="viewport-status">Brush Library  </div><div class="brush-shelf"><span class="brush-shelf-tile active"><img src="../Assets/Brush%20Icon/default/Clay.png" alt="Clay brush" /></span><span class="brush-shelf-tile"><img src="../Assets/Brush%20Icon/default/Standard.png" alt="Standard brush" /></span><span class="brush-shelf-tile"><img src="../Assets/Brush%20Icon/default/Clay_Buildup.png" alt="Clay Buildup brush" /></span><span class="brush-shelf-tile"><img src="../Assets/Brush%20Icon/default/Crease_Polish.png" alt="Crease Polish brush" /></span><span class="brush-shelf-tile"><img src="../Assets/Brush%20Icon/default/Crease_Sharp.png" alt="Crease Sharp brush" /></span><span class="brush-shelf-tile"><img src="../Assets/Brush%20Icon/default/Draw%20Sharp.png" alt="Draw Sharp brush" /></span><span class="brush-shelf-tile"><img src="../Assets/Brush%20Icon/default/Inflate.png" alt="Inflate brush" /></span><span class="brush-shelf-tile"><img src="../Assets/Brush%20Icon/default/Move.png" alt="Move brush" /></span><span class="brush-shelf-tile"><img src="../Assets/Brush%20Icon/default/Move_Elastic.png" alt="Move Elastic brush" /></span><span class="brush-shelf-tile"><img src="../Assets/Brush%20Icon/default/Move_Topo.png" alt="Move Topo brush" /></span><span class="brush-shelf-tile"><img src="../Assets/Brush%20Icon/default/Blob.png" alt="Blob brush" /></span><span class="brush-shelf-tile"><img src="../Assets/Brush%20Icon/default/Clay.png" alt="Clay brush" /></span></div></div><aside class="blender-side"><div class="blender-panel"><div class="blender-panel-title">Scene Collection</div><div class="outliner-row active"><span>▾</span>Head_Sculpt</div><div class="outliner-row"><span>◈</span>Brush_Clay</div><div class="outliner-row"><span>◌</span>Camera</div><div class="outliner-row"><span>◇</span>Light</div></div><div class="blender-panel"><div class="blender-panel-title">Brush Settings</div><div class="property-row">Size <span class="property-value">100 px</span></div><div class="property-row">Strength <span class="property-value">0.50</span></div><div class="property-row">Direction <span class="property-value">Add</span></div><div class="property-row">Symmetry <span class="property-value">X</span></div></div></aside></div>
+      </div>
+      <div class="demo-caption"><strong>Blender-native context, Sculpt-Wheel speed.</strong><span class="mono">HOLD SPACE / PICK BRUSH / RELEASE</span></div>
+    </div></section>
+
+    <section class="section features-showcase" id="features"><div class="wrap">
+      <div class="section-head"><div><div class="eyebrow">Made for the flow</div><h2>Everything your sculpting <span>flow needs.</span></h2></div><p>Fast brush access, visual layout control, grouped variants, and Blender-native selection in one focused workflow.</p></div>
+      <div class="feature-mosaic">
+        <article class="sw-feature-card">
+          <span class="sw-feature-index">01 · Cursor wheel</span>
+          <div class="sw-feature-inner">
+            <div class="sw-feature-copy"><p class="sw-feature-kicker">Space · point · release</p><h3>Your shortcut. Your brushes. Right there.</h3><p>Hold Space in Sculpt Mode and the wheel opens under your cursor. Move toward a brush and release to select without leaving the viewport.</p></div>
+            <div class="sw-feature-visual" aria-hidden="true"><div class="fm-wheel">
+              <span class="fm-ray" style="--a:-90deg"></span><span class="fm-ray" style="--a:-45deg"></span><span class="fm-ray" style="--a:0deg"></span><span class="fm-ray" style="--a:45deg"></span><span class="fm-ray" style="--a:90deg"></span><span class="fm-ray" style="--a:135deg"></span><span class="fm-ray" style="--a:180deg"></span><span class="fm-ray" style="--a:225deg"></span>
+              <span class="fm-center"></span>
+              <span class="fm-brush" style="--a:0deg"><img src="assets/sculpt-wheel/brush-icons/default/Standard.png" alt="" /></span><span class="fm-brush" style="--a:45deg"><img src="assets/sculpt-wheel/brush-icons/default/Draw%20Sharp.png" alt="" /></span><span class="fm-brush active has-sub" style="--a:90deg"><img src="assets/sculpt-wheel/brush-icons/default/Move.png" alt="" /></span><span class="fm-brush" style="--a:135deg"><img src="assets/sculpt-wheel/brush-icons/default/Clay.png" alt="" /></span><span class="fm-brush" style="--a:180deg"><img src="assets/sculpt-wheel/brush-icons/default/Clay_Buildup.png" alt="" /></span><span class="fm-brush" style="--a:225deg"><img src="assets/sculpt-wheel/brush-icons/default/Blob.png" alt="" /></span><span class="fm-brush" style="--a:270deg"><img src="assets/sculpt-wheel/brush-icons/default/Inflate.png" alt="" /></span><span class="fm-brush" style="--a:315deg"><img src="assets/sculpt-wheel/brush-icons/default/Crease_Sharp.png" alt="" /></span>
+            </div></div>
+          </div>
+        </article>
+        <article class="sw-feature-card">
+          <span class="sw-feature-index">02 · Sub-brushes</span>
+          <div class="sw-feature-inner">
+            <div class="sw-feature-copy"><p class="sw-feature-kicker">More options · same slot</p><h3>Keep related brushes together.</h3><p>Group up to three optional variants beneath one main brush and reach specialized tools from the same familiar direction.</p></div>
+            <div class="sub-feature-visual" aria-hidden="true"><div class="sub-feature-wheel">
+              <span class="sub-feature-ray" style="--a:-45deg"></span><span class="sub-feature-ray" style="--a:0deg"></span><span class="sub-feature-ray" style="--a:45deg"></span>
+              <span class="sub-feature-main-brush"><img src="assets/sculpt-wheel/brush-icons/default/Move.png" alt="" /></span>
+              <span class="sub-feature-brush" style="--a:45deg"><img src="assets/sculpt-wheel/brush-icons/default/Move_Elastic.png" alt="" /></span><span class="sub-feature-brush" style="--a:90deg"><img src="assets/sculpt-wheel/brush-icons/default/Inflate.png" alt="" /></span><span class="sub-feature-brush" style="--a:135deg"><img src="assets/sculpt-wheel/brush-icons/default/Move_Topo.png" alt="" /></span>
+            </div></div>
+          </div>
+        </article>
+        <article class="sw-feature-card">
+          <span class="sw-feature-index">03 · Presets</span>
+          <div class="sw-feature-inner">
+            <div class="sw-feature-copy"><p class="sw-feature-kicker">Save · switch · sculpt</p><h3>Presets, always ready.</h3><p>Save your wheel layouts as persistent presets and switch between them without rebuilding your brush setup.</p></div>
+            <div class="sw-feature-visual" aria-hidden="true">
+              <div class="preset-mini">
+                <div class="preset-mini-head"><span>Wheel presets</span><span class="preset-mini-saved"><span class="preset-mini-saved-dot"></span><span class="preset-mini-saved-label">Saved</span></span></div>
+                <div class="preset-mini-list">
+                  <span class="preset-mini-item"><img src="assets/sculpt-wheel/Scuplt_Mode.png" alt="" />Default</span>
+                  <span class="preset-mini-item active"><img src="assets/sculpt-wheel/icon-library/Extra/Brush_Data.png" alt="" />Detail</span>
+                  <span class="preset-mini-item"><img src="assets/sculpt-wheel/Tool_Settings.png" alt="" />Custom</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="sw-feature-card">
+          <span class="sw-feature-index">04 · Brush imports</span>
+          
+          
+          <div class="sw-feature-inner">
+            <div class="sw-feature-copy"><p class="sw-feature-kicker">Bring your own brushes</p><h3>Your brush library. Inside your wheel.</h3><p>Bring brushes from an external Blender brush library into Sculpt-Wheel, place them in your preferred slots, and keep every favorite one gesture away.</p></div>
+            <div class="sw-feature-visual bridge-visual" aria-hidden="true">
+              <div class="bridge-stage">
+                <div class="bridge-panel bridge-wheel-panel">
+                  <span class="bridge-label">External library</span>
+                  <div class="bridge-brush-grid">
+                    <span class="bridge-brush"><img src="assets/sculpt-wheel/brush-icons/default/3_matched.png" alt="" /></span>
+                    <span class="bridge-brush"><img src="assets/sculpt-wheel/brush-icons/default/4_matched.png" alt="" /></span>
+                    <span class="bridge-brush"><img src="assets/sculpt-wheel/brush-icons/default/5_matched.png" alt="" /></span>
+                    <span class="bridge-brush"><img src="assets/sculpt-wheel/brush-icons/default/6_matched.png" alt="" /></span>
+                    <span class="bridge-brush active"><img src="assets/sculpt-wheel/brush-icons/default/7_matched.png" alt="" /></span>
+                    <span class="bridge-brush"><img src="assets/sculpt-wheel/brush-icons/default/Move_Elastic.png" alt="" /></span>
+                  </div>
+                  <span class="bridge-status"><strong>Brush</strong> selected</span>
+                </div>
+                <div class="bridge-link">
+                  <span class="bridge-link-label">Import</span>
+                  <span class="bridge-line"><span class="bridge-pulse"></span></span>
+                  <span class="bridge-link-state">Add to wheel</span>
+                </div>
+                <div class="bridge-panel bridge-blender-panel">
+                  <span class="bridge-label">Sculpt-Wheel</span>
+                  <span class="bridge-mode">Wheel slot</span>
+                  <div class="bridge-active-brush">
+                    <img src="assets/sculpt-wheel/brush-icons/default/7_matched.png" alt="" />
+                    <span class="bridge-active-copy"><strong>Custom Brush</strong><span>Imported brush</span></span>
+                  </div>
+                  <span class="bridge-status"><strong>Ready</strong> in the wheel</span>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+
+
+
+
+
+
+
+
+
+
+
+        </article>
+        <article class="sw-feature-card sw-editor-feature-card">
+          <span class="sw-feature-index">05 · Custom layouts</span>
+          <div class="sw-feature-inner">
+            <div class="sw-feature-copy"><p class="sw-feature-kicker">Drag · drop · sculpt</p><h3>Build a wheel that works your way</h3><p>Design each preset around the way you sculpt. Search Blender's brush library, drag any brush into a main or sub-brush slot, reorder the wheel, and preview every change instantly. Fine-tune the layout, then save it as a reusable preset that stays ready for your next session.
+
+</p></div>
+            <div class="sw-feature-visual sw-editor-feature-visual">
+              <div class="editor-dnd-demo" data-editor-dnd-demo>
+                <div class="editor-dnd-panel editor-dnd-wheel-panel">
+                  <div class="editor-dnd-bar">WHEEL PREVIEW · PRESET-1</div>
+                  <div class="editor-dnd-wheel" aria-label="Empty eight-slot Sculpt-Wheel preview">
+                    <span class="editor-dnd-ray" style="--a:-90deg"></span><span class="editor-dnd-ray" style="--a:-45deg"></span><span class="editor-dnd-ray" style="--a:0deg"></span><span class="editor-dnd-ray" style="--a:45deg"></span><span class="editor-dnd-ray" style="--a:90deg"></span><span class="editor-dnd-ray" style="--a:135deg"></span><span class="editor-dnd-ray" style="--a:180deg"></span><span class="editor-dnd-ray" style="--a:225deg"></span>
+                    <span class="editor-dnd-center"></span>
+                    <span class="editor-dnd-slot" data-editor-slot="0" style="--a:0deg"><img alt="" /></span>
+                    <span class="editor-dnd-slot" data-editor-slot="1" style="--a:45deg"><img alt="" /></span>
+                    <span class="editor-dnd-slot" data-editor-slot="2" style="--a:90deg"><img alt="" /></span>
+                    <span class="editor-dnd-slot" data-editor-slot="3" style="--a:135deg"><img alt="" /></span>
+                    <span class="editor-dnd-slot" data-editor-slot="4" style="--a:180deg"><img alt="" /></span>
+                    <span class="editor-dnd-slot" data-editor-slot="5" style="--a:225deg"><img alt="" /></span>
+                    <span class="editor-dnd-slot" data-editor-slot="6" style="--a:270deg"><img alt="" /></span>
+                    <span class="editor-dnd-slot" data-editor-slot="7" style="--a:315deg"><img alt="" /></span>
+                  </div>
+                </div>
+                <div class="editor-dnd-panel editor-dnd-library-panel">
+                  <div class="editor-dnd-bar">BRUSH LIBRARY · 8 BRUSHES</div>
+                  <div class="editor-dnd-library-grid">
+                    <span class="editor-dnd-library-item" draggable="true" data-editor-brush="0"><img src="assets/sculpt-wheel/brush-icons/default/Standard.png" alt="Standard brush" /></span>
+                    <span class="editor-dnd-library-item" draggable="true" data-editor-brush="1"><img src="assets/sculpt-wheel/brush-icons/default/Draw%20Sharp.png" alt="Draw Sharp brush" /></span>
+                    <span class="editor-dnd-library-item" draggable="true" data-editor-brush="2"><img src="assets/sculpt-wheel/brush-icons/default/Move.png" alt="Move brush" /></span>
+                    <span class="editor-dnd-library-item" draggable="true" data-editor-brush="3"><img src="assets/sculpt-wheel/brush-icons/default/Clay.png" alt="Clay brush" /></span>
+                    <span class="editor-dnd-library-item" draggable="true" data-editor-brush="4"><img src="assets/sculpt-wheel/brush-icons/default/Clay_Buildup.png" alt="Clay Buildup brush" /></span>
+                    <span class="editor-dnd-library-item" draggable="true" data-editor-brush="5"><img src="assets/sculpt-wheel/brush-icons/default/Blob.png" alt="Blob brush" /></span>
+                    <span class="editor-dnd-library-item" draggable="true" data-editor-brush="6"><img src="assets/sculpt-wheel/brush-icons/default/Inflate.png" alt="Inflate brush" /></span>
+                    <span class="editor-dnd-library-item" draggable="true" data-editor-brush="7"><img src="assets/sculpt-wheel/brush-icons/default/Crease_Sharp.png" alt="Crease brush" /></span>
+                  </div>
+                </div>
+                <span class="editor-dnd-drag" aria-hidden="true"><img src="" alt="" /></span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div></section>
+
+
+   
+    <section class="section" id="workflow">
+      <div class="wrap">
+        <div class="section-head">
+          <div><div class="eyebrow">Workflow</div><h2>Press. Pick. <span>Keep sculpting.</span></h2></div>
+          <p>A short gesture keeps brush selection inside the viewport, so your hands stay on the sculpt and your attention stays on the form.</p>
+        </div>
+        <div class="workflow">
+          <article class="step">
+            <div class="workflow-cue"><span class="workflow-keycap">Space</span></div>
+            <h3>Hold Space.</h3>
+            <p>While working in Sculpt Mode, hold Space and Sculpt-Wheel opens directly under your cursor with the current preset ready.</p>
+          </article>
+          <article class="step">
+            <div class="workflow-cue"><img src="assets/sculpt-wheel/Click-Wheel-Minimal.svg" alt="" /></div>
+            <h3>Point to a brush.</h3>
+            <p>Move toward a main brush or one of its grouped variants. The direction stays familiar, making the right tool quick to reach.</p>
+          </article>
+          <article class="step">
+            <div class="workflow-cue"><img src="assets/sculpt-wheel/brush-icons/default/Clay.png" alt="" /></div>
+            <h3>Release and sculpt.</h3>
+            <p>Release Space to activate the selected Blender brush. The wheel closes immediately and you continue sculpting without breaking flow.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section how-section" id="how">
+      <div class="wrap">
+        <div class="section-head">
+          <div><div class="eyebrow">How it works</div><h2>Install. Activate. <span>Start sculpting.</span></h2></div>
+          <p>Three clear steps take Sculpt-Wheel from a downloaded ZIP to a licensed, Blender-native brush workflow.</p>
+        </div>
+        <div class="how-steps">
+          <article class="how-step">
+            <div class="how-step-copy"><span class="how-step-num">01</span><h3>Install the add-on.</h3><p>In Blender 4.3 or newer, open Edit &gt; Preferences &gt; Get Extensions. Choose Install from Disk, select the Sculpt-Wheel ZIP without extracting it, then enable the add-on.</p></div>
+            <div class="how-step-visual" aria-hidden="true"><div class="how-ui"><div class="how-ui-head"><strong>Blender Preferences</strong><span>Get Extensions</span></div><div class="how-ui-row"><span>Install from Disk</span><span class="how-ui-chip">Choose ZIP</span></div><div class="how-ui-row active"><span class="how-ui-code">Sculpt-Wheel-1.0.010.zip</span><span class="how-ui-action">Install</span></div></div></div>
+          </article>
+          <article class="how-step">
+            <div class="how-step-copy"><span class="how-step-num">02</span><h3>Request your activation key.</h3><p>Copy the Machine Code from Sculpt-Wheel's preferences, then send it with your Superhive receipt or order ID through the Superhive Inbox.</p></div>
+            <div class="how-step-visual" aria-hidden="true"><div class="how-ui"><div class="how-ui-head"><strong>License request</strong><span>Superhive Inbox</span></div><div class="how-ui-row active"><span class="how-ui-code">Machine Code&nbsp; SW-MACHINE-XXXX-XXXX</span><span class="how-ui-action">Copy</span></div><div class="how-ui-row"><span>Receipt / Order ID</span><span class="how-ui-chip">Attach</span></div></div></div>
+          </article>
+          <article class="how-step">
+            <div class="how-step-copy"><span class="how-step-num">03</span><h3>Activate and start sculpting.</h3><p>Paste the returned key and press Activate. Verification runs offline; enter Sculpt Mode and press Space whenever you need the wheel.</p></div>
+            <div class="how-step-visual" aria-hidden="true"><div class="how-ui"><div class="how-ui-head"><strong>Sculpt-Wheel License</strong><span class="how-ui-status">Offline ready</span></div><div class="how-ui-row active"><span class="how-ui-code">SW4-XXXXX-XXXXX-XXXXX</span><span class="how-ui-action">Activate</span></div><div class="how-ui-row"><span>Open in Sculpt Mode</span><span class="how-key">Space</span></div></div></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="install">
+      <div class="wrap">
+        <div class="install-card">
+          <div>
+            <div class="eyebrow">Ready when you are</div>
+            <h2>Make your next sculpt <span>feel lighter.</span></h2>
+            <p>Install Sculpt-Wheel and bring a faster brush workflow into Blender 4.3 and newer.</p>
+          </div>
+          <a class="button primary" href="#how">See how it works <span>-&gt;</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+ <footer class="wrap"><span> © 2026 Sculpt-Wheel | CG Guides</span><span class="mono">Sculpt-Wheel v-1.0.010 | BLENDER 4.3+</span></footer>
+  <script>
+    (() => {
+      const heroSection = document.querySelector('.hero');
+      const workspaceSection = document.querySelector('#workspace');
+      if (heroSection && workspaceSection) heroSection.insertAdjacentElement('afterend', workspaceSection);
+      document.querySelectorAll('img[src^="../Assets/Brush%20Icon/"]').forEach((image) => {
+        image.src = image.getAttribute('src').replace('../Assets/Brush%20Icon/', 'assets/sculpt-wheel/brush-icons/');
+      });
+      const shadingControl = document.querySelector('.blender-workbar .spacer + span');
+      const workbar = document.querySelector('.blender-workbar');
+      if (shadingControl && workbar) {
+        shadingControl.classList.add('viewport-shading');
+        shadingControl.innerHTML = '<span class="viewport-shading-label"></span><img src="assets/sculpt-wheel/Show_Gizmos.png" alt="Show Gizmos" /><img src="assets/sculpt-wheel/Overlays.png" alt="Overlays" /><img src="assets/sculpt-wheel/Toggle_XRay.png" alt="Toggle X-Ray" /><img src="assets/sculpt-wheel/Wireframe_Shading.png" alt="Wireframe" /><img src="assets/sculpt-wheel/Material_Preview.png" alt="Material Preview" /><img src="assets/sculpt-wheel/Rendered.png" alt="Rendered" />';
+        workbar.appendChild(shadingControl);
+      }
+      const viewport = document.querySelector('.blender-viewport');
+      if (!viewport) return;
+      const brushLibraryHint = document.createElement('div');
+      brushLibraryHint.className = 'brush-library-hint';
+      brushLibraryHint.innerHTML = '<img src="assets/sculpt-wheel/Click-Wheel-Minimal.svg" alt="" /><span>Click to open the wheel</span>';
+      viewport.appendChild(brushLibraryHint);
+      const iconPath = 'assets/sculpt-wheel/icon-library/Extra/';
+      const editorIconPath = 'assets/sculpt-wheel/icon-library/Editor_Type/';
+      const editIconPath = 'assets/sculpt-wheel/icon-library/Edit/';
+      const navigationIconPath = 'assets/sculpt-wheel/';
+      const triangleIconPath = 'assets/sculpt-wheel/';
+      const outlinerPanel = document.querySelector('.blender-side .blender-panel');
+      if (outlinerPanel) {
+        outlinerPanel.innerHTML = `
+          <div class="outliner-header">
+            <img src="${editorIconPath}Outliner.png" alt="Outliner" />
+            <img src="${editIconPath}Menu_Search.png" alt="Search menu" />
+            <span class="outliner-search">Search</span>
+           
+          </div>
+          <div class="blender-panel-title"><img class="outliner-icon" src="${iconPath}Collection.png" alt="" /> Scene Collection</div>
+          <div class="outliner-row active"><span><img class="outliner-icon" src="${triangleIconPath}Triangle_Down.png" alt="" /></span><img class="outliner-icon" src="${iconPath}Collection.png" alt="" />Reference <span class="outliner-actions"><img src="${iconPath}Restrict_View_On.png" alt="Visible" /><img src="${iconPath}Restrict_Color_On.png" alt="Viewport" /><img src="${iconPath}Restrict_Render_On.png" alt="Render" /></span></div>
+          <div class="outliner-row"><span><img class="outliner-icon" src="${triangleIconPath}Triangle_Down.png" alt="" /></span><img class="outliner-icon" src="${iconPath}Collection.png" alt="" />Mesh <span class="outliner-actions"><img src="${iconPath}Restrict_View_On.png" alt="Visible" /><img src="${iconPath}Restrict_Color_On.png" alt="Viewport" /><img src="${iconPath}Restrict_Render_On.png" alt="Render" /></span></div>
+          <div class="outliner-row nested"><span><img class="outliner-icon" src="${triangleIconPath}Triangle_Right.png" alt="" /></span><img class="outliner-icon" src="${iconPath}Object_Datamode.png" alt="" />Sculpt <span class="outliner-actions"><img src="${iconPath}Restrict_View_On.png" alt="Visible" /><img src="${iconPath}Restrict_Color_On.png" alt="Viewport" /><img src="${iconPath}Mesh_Data.png" alt="Mesh data" /></span></div>
+          <div class="outliner-row"><span><img class="outliner-icon" src="${triangleIconPath}Triangle_Right.png" alt="" /></span><img class="outliner-icon" src="${iconPath}Collection.png" alt="" />Lighting <span class="outliner-actions"><img src="${iconPath}Restrict_View_On.png" alt="Visible" /><img src="${iconPath}Restrict_Color_On.png" alt="Viewport" /><img src="${iconPath}Restrict_Render_On.png" alt="Render" /></span></div>`;
+      }
+      const settingsPanel = document.querySelectorAll('.blender-side .blender-panel')[1];
+      if (settingsPanel) {
+        settingsPanel.innerHTML = `
+          <div class="brush-properties">
+            <div class="property-tabs"><img class="property-tab active" src="${iconPath}Tool_Settings.png" alt="Brush" /><img class="property-tab" src="${iconPath}Brush_Data.png" alt="Texture" /><img class="property-tab" src="${iconPath}Texture_Data.png" alt="Stroke" /><img class="property-tab" src="${iconPath}Material_Data.png" alt="Falloff" /></div>
+            <div class="brush-properties-main">
+              <div class="properties-search">Brush Settings</div>
+              <div class="brush-asset-card"><div class="brush-asset-title">Brush Asset - <span class="selected-brush-name">Clay</span></div><div class="brush-asset-preview"><img class="selected-brush-preview" src="assets/sculpt-wheel/brush-icons/default/Clay.png" alt="Clay brush" /></div></div>
+              <div class="brush-section"><div class="brush-section-title">Brush Settings <span>⌃</span></div><div class="brush-setting-row">Size <span class="brush-setting-value">100 px</span></div><div class="brush-setting-row">Size Unit <span class="brush-setting-value">View</span></div><div class="brush-setting-row">Strength <span class="brush-setting-value">0.500</span></div><div class="brush-setting-row">Direction <span class="brush-setting-value">+ Add</span></div></div>
+              <div class="brush-section"><div class="brush-section-title">Advanced <span>›</span></div></div><div class="brush-section"><div class="brush-section-title">Texture <span>›</span></div></div><div class="brush-section"><div class="brush-section-title">Stroke <span>›</span></div></div>
+            </div>
+          </div>`;
+      }
+      const brushAssetFiles = {
+        'Standard': 'Standard.png', 'Draw Sharp': 'Draw%20Sharp.png', 'Clay': 'Clay.png',
+        'Clay Buildup': 'Clay_Buildup.png', 'Move': 'Move.png', 'Move Elastic': 'Move_Elastic.png',
+        'Move 2D': 'Move_Topo.png', 'Blob': 'Blob.png', 'Inflate': 'Inflate.png',
+        'Crease': 'Crease_Sharp.png', 'Crease Polish': 'Crease_Polish.png'
+      };
+      const updateBrushAsset = (name) => {
+        const nameNode = document.querySelector('.selected-brush-name');
+        const imageNode = document.querySelector('.selected-brush-preview');
+        if (nameNode) nameNode.textContent = name;
+        if (imageNode && brushAssetFiles[name]) {
+          imageNode.src = `assets/sculpt-wheel/brush-icons/default/${brushAssetFiles[name]}`;
+          imageNode.alt = `${name} brush`;
+        }
+      };
+      const viewportGizmo = viewport.querySelector('.viewport-gizmo');
+      if (viewportGizmo) {
+        viewportGizmo.innerHTML = `
+          <div class="viewport-front"><img src="${navigationIconPath}Front.png" alt="Front view" /></div>
+          <div class="viewport-gizmo-tools"><span class="viewport-gizmo-tool"><img src="${navigationIconPath}View_Zoom.png" alt="Zoom" /></span><span class="viewport-gizmo-tool"><img src="${navigationIconPath}View_Pan.png" alt="Pan" /></span><span class="viewport-gizmo-tool"><img src="${navigationIconPath}Camera.png" alt="Camera" /></span><span class="viewport-gizmo-tool"><img src="${navigationIconPath}View_Ortho.png" alt="Grid" /></span></div>`;
+      }
+      const icons = [
+        'Standard.png', 'Draw%20Sharp.png', 'Move.png', 'Clay.png',
+        'Clay_Buildup.png', 'Blob.png', 'Inflate.png', 'Crease_Sharp.png'
+      ];
+      const names = ['Standard', 'Draw Sharp', 'Move', 'Clay', 'Clay Buildup', 'Blob', 'Inflate', 'Crease'];
+      const heroWheel = document.querySelector('.hero-wheel');
+      if (heroWheel) {
+        heroWheel.className = 'wheel-ring hero-wheel hero-double-ring';
+        heroWheel.innerHTML = '<span class="wheel-center"></span><span class="hero-wheel-orbit inner"></span><span class="hero-wheel-scroll-layer"><span class="hero-wheel-orbit outer"></span></span>';
+        const heroIcons = [
+          'Inflate.png', 'Crease_Sharp.png', 'Standard.png', 'Draw%20Sharp.png',
+          'Move.png', 'Clay.png', 'Clay_Buildup.png', 'Blob.png',
+          'Crease_Polish.png', 'Move_Elastic.png', 'Move_Topo.png', '3_matched.png',
+          '4_matched.png', '5_matched.png', '6_matched.png', '7_matched.png'
+        ];
+        const heroLabels = [
+          'Inflate', 'Crease', 'Standard', 'Draw Sharp',
+          'Move', 'Clay', 'Clay Buildup', 'Blob'
+        ];
+        const heroRings = [
+          { selector: '.hero-wheel-orbit.inner', radius: 140, offset: -90, items: heroIcons.slice(0, 8) },
+          { selector: '.hero-wheel-orbit.outer', radius: 238, offset: -67.5, items: heroIcons.slice(8) }
+        ];
+        heroRings.forEach(({ selector, radius, offset, items }) => {
+          const orbit = heroWheel.querySelector(selector);
+          if (selector.includes('.inner')) {
+            items.forEach((_, index) => {
+              const spoke = document.createElement('span');
+              spoke.className = 'hero-wheel-spoke';
+              spoke.style.setProperty('--spoke-angle', `${index * (360 / items.length) + offset}deg`);
+              orbit.appendChild(spoke);
+            });
+          }
+          items.forEach((icon, index) => {
+            const angle = index * (360 / items.length) + offset;
+            const node = document.createElement('span');
+            node.className = 'hero-brush-node';
+            node.style.setProperty('--slot-angle', `${angle}deg`);
+            node.style.setProperty('--slot-radius', `${radius}px`);
+            const button = document.createElement('button');
+            button.className = 'wheel-slot';
+            button.type = 'button';
+            button.setAttribute('aria-label', `${icon.replace(/%20/g, ' ').replace('.png', '')} brush`);
+            button.innerHTML = `<img src="assets/sculpt-wheel/brush-icons/default/${icon}" alt="" />`;
+            node.appendChild(button);
+            orbit.appendChild(node);
+            if (selector.includes('.inner')) {
+              const label = document.createElement('span');
+              label.className = 'hero-wheel-main-label';
+              label.textContent = heroLabels[index];
+              const radians = angle * Math.PI / 180;
+              label.style.setProperty('--label-x', `${(Math.sin(radians) * radius).toFixed(2)}px`);
+              label.style.setProperty('--label-y', `${(-Math.cos(radians) * radius + 50).toFixed(2)}px`);
+              orbit.appendChild(label);
+            }
+          });
+        });
+        const heroStage = document.querySelector('.hero-wheel-stage');
+        const outerScrollLayer = heroWheel.querySelector('.hero-wheel-scroll-layer');
+        let scrollFrame = 0;
+        const updateHeroScroll = () => {
+          scrollFrame = 0;
+          if (!heroStage || !outerScrollLayer) return;
+          const progress = Math.min(1, Math.max(0, window.scrollY / Math.max(1, heroStage.offsetHeight * 1.15)));
+          outerScrollLayer.style.setProperty('--hero-scroll-scale', (1 + progress * .32).toFixed(3));
+          outerScrollLayer.style.setProperty('--hero-scroll-rotation', `${(progress * 34).toFixed(2)}deg`);
+        };
+        window.addEventListener('scroll', () => {
+          if (!scrollFrame) scrollFrame = requestAnimationFrame(updateHeroScroll);
+        }, { passive: true });
+        updateHeroScroll();
+      }
+      const overlay = document.createElement('div');
+      overlay.className = 'wheel-overlay';
+      overlay.setAttribute('aria-hidden', 'true');
+      overlay.innerHTML = '<div class="wheel-ring"><button class="wheel-center" type="button"><strong>SCULPT-WHEEL</strong>ESC TO CLOSE</button></div>';
+      const ring = overlay.querySelector('.wheel-ring');
+      const wheelRadius = 116;
+      const wheelCenter = 190;
+      const shelfTiles = [...viewport.querySelectorAll('.brush-shelf-tile')];
+      const activateShelfBrush = (name) => {
+        updateBrushAsset(name);
+        const wanted = name.toLowerCase().replace(/\s+/g, '_');
+        shelfTiles.forEach((tile) => {
+          const image = tile.querySelector('img');
+          const file = image ? image.getAttribute('src').split('/').pop().toLowerCase().replace(/%20/g, '_') : '';
+          const match = file.startsWith(`${wanted}.`)
+            || (wanted === 'crease' && file === 'crease_sharp.png')
+            || (wanted === 'move_2d' && file === 'move_topo.png');
+          tile.classList.toggle('active', match);
+        });
+      };
+      const subGroups = {
+        2: [
+          { name: 'Move Elastic', file: 'Move_Elastic.png' },
+          { name: 'Move 2D', file: 'Move_Topo.png' }
+        ],
+        7: [{ name: 'Crease Polish', file: 'Crease_Polish.png' }]
+      };
+      const subLayer = document.createElement('div');
+      subLayer.className = 'sub-wheel-layer';
+      ring.appendChild(subLayer);
+      const hideSubWheel = () => {
+        subLayer.classList.remove('open');
+        subLayer.dataset.parentIndex = '';
+        subLayer.innerHTML = '';
+      };
+      const showSubWheel = (parentIndex) => {
+        const children = subGroups[parentIndex];
+        if (!children) { hideSubWheel(); return; }
+        if (subLayer.dataset.parentIndex === String(parentIndex) && subLayer.classList.contains('open')) return;
+        subLayer.dataset.parentIndex = String(parentIndex);
+        subLayer.innerHTML = '';
+        const parentAngle = parentIndex * 45 - 90;
+        const parentX = wheelCenter + Math.cos(parentAngle * Math.PI / 180) * 145;
+        const parentY = wheelCenter + Math.sin(parentAngle * Math.PI / 180) * 145;
+        const baseAngle = parentAngle * Math.PI / 180;
+        const spread = children.length === 2 ? 55 : 0;
+        children.forEach((child, childIndex) => {
+          const angle = baseAngle + ((children.length - 1) / 2 - childIndex) * spread * Math.PI / 180;
+          const childX = parentX + Math.cos(angle) * 105;
+          const childY = parentY + Math.sin(angle) * 105;
+          const guide = document.createElement('span');
+          guide.className = 'sub-wheel-guide';
+          const lineStart = 38;
+          const lineEnd = 29;
+          guide.style.left = `${parentX + Math.cos(angle) * lineStart}px`;
+          guide.style.top = `${parentY + Math.sin(angle) * lineStart}px`;
+          guide.style.width = `${105 - lineStart - lineEnd}px`;
+          guide.style.transform = `rotate(${angle}rad)`;
+          subLayer.appendChild(guide);
+          const slot = document.createElement('button');
+          slot.className = 'sub-wheel-slot';
+          slot.type = 'button';
+          slot.title = child.name;
+          slot.style.left = `${childX}px`;
+          slot.style.top = `${childY}px`;
+          slot.innerHTML = `<img src="assets/sculpt-wheel/brush-icons/default/${child.file}" alt="${child.name} brush" />`;
+          const label = document.createElement('span');
+          label.className = 'sub-wheel-label';
+          label.textContent = child.name;
+          label.style.left = `${childX}px`;
+          label.style.top = `${childY + 38}px`;
+          slot.addEventListener('mouseenter', () => {
+            subLayer.querySelectorAll('.sub-wheel-slot, .sub-wheel-label').forEach((item) => item.classList.remove('active'));
+            slot.classList.add('active');
+            label.classList.add('active');
+          });
+          slot.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const viewportLabel = viewport.querySelector('.viewport-head strong');
+            if (viewportLabel) viewportLabel.textContent = child.name;
+            activateShelfBrush(child.name);
+            overlay.classList.remove('open');
+            viewport.classList.remove('wheel-open');
+            overlay.setAttribute('aria-hidden', 'true');
+            hideSubWheel();
+          });
+          subLayer.appendChild(label);
+          subLayer.appendChild(slot);
+        });
+        requestAnimationFrame(() => subLayer.classList.add('open'));
+      };
+      for (let index = 0; index < 8; index += 1) {
+        const angle = index * 45 - 90;
+        const guide = document.createElement('span');
+        guide.className = 'wheel-guide';
+        guide.style.setProperty('--guide-angle', `${angle}deg`);
+        ring.appendChild(guide);
+      }
+      icons.forEach((icon, index) => {
+        const button = document.createElement('button');
+        button.className = 'wheel-slot';
+        button.type = 'button';
+        const buttonAngle = index * 45 - 90;
+        button.style.left = `${wheelCenter + Math.cos(buttonAngle * Math.PI / 180) * 145}px`;
+        button.style.top = `${wheelCenter + Math.sin(buttonAngle * Math.PI / 180) * 145}px`;
+        button.title = names[index];
+        button.dataset.label = names[index];
+        if (subGroups[index]) {
+          button.classList.add('has-sub');
+          button.style.setProperty('--sub-dot-x', `${(Math.cos(buttonAngle * Math.PI / 180) * 47.5).toFixed(2)}px`);
+          button.style.setProperty('--sub-dot-y', `${(Math.sin(buttonAngle * Math.PI / 180) * 47.5).toFixed(2)}px`);
+        }
+        if (index === 3) button.classList.add('active');
+        button.innerHTML = `<img src="assets/sculpt-wheel/brush-icons/default/${icon}" alt="${names[index]} brush" />`;
+        const angle = index * 45 - 90;
+        const wheelLabel = document.createElement('span');
+        wheelLabel.className = `wheel-label${index === 3 ? ' active' : ''}`;
+        wheelLabel.textContent = names[index];
+        wheelLabel.style.left = `${wheelCenter + Math.cos(angle * Math.PI / 180) * 145}px`;
+        wheelLabel.style.top = `${wheelCenter + Math.sin(angle * Math.PI / 180) * 145 + 49}px`;
+        ring.appendChild(wheelLabel);
+        button.addEventListener('mouseenter', () => {
+          ring.querySelectorAll('.wheel-slot, .wheel-label').forEach((item) => item.classList.remove('active'));
+          button.classList.add('active');
+          wheelLabel.classList.add('active');
+          showSubWheel(index);
+        });
+        button.addEventListener('click', (event) => {
+          event.stopPropagation();
+          if (subGroups[index]) {
+            const viewportLabel = viewport.querySelector('.viewport-head strong');
+            if (viewportLabel) viewportLabel.textContent = names[index];
+            activateShelfBrush(names[index]);
+            hideSubWheel();
+            overlay.classList.remove('open');
+            viewport.classList.remove('wheel-open');
+            overlay.setAttribute('aria-hidden', 'true');
+            return;
+          }
+          const viewportLabel = viewport.querySelector('.viewport-head strong');
+          if (viewportLabel) viewportLabel.textContent = names[index];
+          ring.querySelectorAll('.wheel-slot').forEach((slot) => slot.classList.remove('active'));
+          ring.querySelectorAll('.wheel-label').forEach((slotLabel) => slotLabel.classList.remove('active'));
+          button.classList.add('active');
+          wheelLabel.classList.add('active');
+          activateShelfBrush(names[index]);
+          overlay.classList.remove('open');
+          viewport.classList.remove('wheel-open');
+          overlay.setAttribute('aria-hidden', 'true');
+        });
+        ring.appendChild(button);
+      });
+      overlay.addEventListener('mousemove', (event) => {
+        const rect = ring.getBoundingClientRect();
+        const dx = event.clientX - (rect.left + rect.width / 2);
+        const dy = event.clientY - (rect.top + rect.height / 2);
+        if (Math.hypot(dx, dy) < 30) return;
+        let index = Math.round((Math.atan2(dy, dx) * 180 / Math.PI + 90) / 45) % 8;
+        if (index < 0) index += 8;
+        ring.querySelectorAll('.wheel-slot, .wheel-label').forEach((item) => item.classList.remove('active'));
+        ring.querySelectorAll('.wheel-slot')[index].classList.add('active');
+        ring.querySelectorAll('.wheel-label')[index].classList.add('active');
+        showSubWheel(index);
+      });
+      overlay.addEventListener('click', (event) => {
+        if (event.target.closest('.wheel-slot, .sub-wheel-slot, .wheel-center')) return;
+        event.stopPropagation();
+        const rect = ring.getBoundingClientRect();
+        const dx = event.clientX - (rect.left + rect.width / 2);
+        const dy = event.clientY - (rect.top + rect.height / 2);
+        if (Math.hypot(dx, dy) < 30) return;
+        let index = Math.round((Math.atan2(dy, dx) * 180 / Math.PI + 90) / 45) % 8;
+        if (index < 0) index += 8;
+        ring.querySelectorAll('.wheel-slot')[index].click();
+      });
+      viewport.appendChild(overlay);
+      viewport.addEventListener('click', (event) => {
+        brushLibraryHint.classList.add('hidden');
+        if (event.target.closest('.sculpt-panel, .brush-shelf, .viewport-gizmo')) return;
+        const rect = viewport.getBoundingClientRect();
+        const x = Math.max(190, Math.min(rect.width - 190, event.clientX - rect.left));
+        const y = Math.max(190, Math.min(rect.height - 190, event.clientY - rect.top));
+        overlay.style.setProperty('--wheel-x', `${x}px`);
+        overlay.style.setProperty('--wheel-y', `${y}px`);
+        const open = overlay.classList.toggle('open');
+        viewport.classList.toggle('wheel-open', open);
+        overlay.setAttribute('aria-hidden', String(!open));
+      });
+      overlay.querySelector('.wheel-center').addEventListener('click', (event) => {
+        event.stopPropagation();
+        overlay.classList.remove('open');
+        viewport.classList.remove('wheel-open');
+        overlay.setAttribute('aria-hidden', 'true');
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          overlay.classList.remove('open');
+          viewport.classList.remove('wheel-open');
+          overlay.setAttribute('aria-hidden', 'true');
+        }
+      });
+    })();
+
+    (() => {
+      const experience = document.querySelector('[data-editor-experience]');
+      if (!experience || !experience.querySelector('.experience-autoplay')) return;
+
+      const modes = [
+        {
+          src: 'assets/Wheel_menu_editor.gif',
+          alt: 'Sculpt-Wheel menu editor: dragging Blender brushes into radial wheel slots',
+          kicker: '01 / WHEEL MENU EDITOR',
+          title: 'Build your wheel visually.',
+          copy: 'Browse Blender brushes, drag them into open slots, and see the complete radial layout before saving it.',
+          points: [
+            'Drag brushes directly into a slot',
+            'Organize main and sub-brushes',
+            'Preview every change live'
+          ],
+          footer: ['8 main brush slots', 'Main + sub-brush layout', 'Preview, tune and save']
+        },
+        {
+          src: 'assets/Gif-1.gif',
+          alt: 'Sculpt-Wheel settings: tuning wheel spacing, scale, icons, submenu, and center controls',
+          kicker: '02 / WHEEL SETTINGS',
+          title: 'Tune the wheel to your hand.',
+          copy: 'Adjust brush distance, wheel scale, icon size, submenu spacing, and center controls while the preview updates instantly.',
+          points: [
+            'Balance wheel size and brush distance',
+            'Tune submenu spacing and icon scale',
+            'Save the setup as a reusable preset'
+          ],
+          footer: ['Live wheel preview', 'Main, submenu + center controls', 'Reusable presets']
+        }
+      ];
+
+      const tabs = [...experience.querySelectorAll('.experience-tab')];
+      const image = experience.querySelector('.experience-screen img');
+      const screen = experience.querySelector('.experience-screen');
+      const autoplay = experience.querySelector('.experience-autoplay');
+      const autoplayLabel = autoplay.querySelector('span');
+      const kicker = experience.querySelector('.experience-kicker');
+      const title = experience.querySelector('.experience-copy h3');
+      const copy = experience.querySelector('.experience-copy p');
+      const points = experience.querySelector('.experience-points');
+      const counters = [...experience.querySelectorAll('.experience-counter span')];
+      const footerItems = [...experience.querySelectorAll('.experience-footer span')];
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let activeIndex = 0;
+      let paused = reduceMotion;
+      let timer = null;
+
+      const updateAutoplay = () => {
+        autoplay.classList.toggle('paused', paused);
+        autoplay.setAttribute('aria-pressed', String(paused));
+        autoplayLabel.textContent = paused ? 'RESUME' : 'AUTO PLAY';
+        experience.querySelector('.experience-counter').classList.toggle('paused', paused);
+      };
+
+      const scheduleNext = () => {
+        window.clearTimeout(timer);
+        if (paused) return;
+        timer = window.setTimeout(() => renderMode((activeIndex + 1) % modes.length), 8000);
+      };
+
+      const renderMode = (index, restartGif = true) => {
+        activeIndex = index;
+        const mode = modes[index];
+        tabs.forEach((tab, tabIndex) => {
+          const active = tabIndex === index;
+          tab.classList.toggle('active', active);
+          tab.setAttribute('aria-selected', String(active));
+          tab.tabIndex = active ? 0 : -1;
+        });
+        kicker.textContent = mode.kicker;
+        title.textContent = mode.title;
+        copy.textContent = mode.copy;
+        points.innerHTML = mode.points.map((point) => `<li>${point}</li>`).join('');
+        counters.forEach((counter, counterIndex) => counter.classList.toggle('active', counterIndex === index));
+        footerItems.forEach((item, itemIndex) => { item.textContent = mode.footer[itemIndex]; });
+        image.alt = mode.alt;
+        image.src = restartGif ? `${mode.src}?cycle=${Date.now()}` : mode.src;
+        scheduleNext();
+      };
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => renderMode(Number(tab.dataset.experienceIndex)));
+      });
+      screen.addEventListener('click', () => renderMode((activeIndex + 1) % modes.length));
+      screen.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        renderMode((activeIndex + 1) % modes.length);
+      });
+      autoplay.addEventListener('click', () => {
+        paused = !paused;
+        updateAutoplay();
+        scheduleNext();
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) window.clearTimeout(timer);
+        else scheduleNext();
+      });
+
+      updateAutoplay();
+      renderMode(0, false);
+    })();
+
+    (() => {
+      const demo = document.querySelector('[data-editor-dnd-demo]');
+      if (!demo) return;
+
+      const brushes = [...demo.querySelectorAll('[data-editor-brush]')];
+      const slots = [...demo.querySelectorAll('[data-editor-slot]')];
+      const floating = demo.querySelector('.editor-dnd-drag');
+      const floatingImage = floating.querySelector('img');
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let step = 0;
+      let timer = 0;
+      let runId = 0;
+      let runningAnimation = null;
+
+      const resetSlots = () => {
+        slots.forEach((slot) => {
+          slot.classList.remove('is-filled', 'is-target');
+          const image = slot.querySelector('img');
+          image.removeAttribute('src');
+          image.alt = '';
+        });
+        brushes.forEach((brush) => brush.classList.remove('is-dragging'));
+      };
+
+      const fillSlot = (brushIndex, slotIndex) => {
+        const brush = brushes[brushIndex];
+        const slot = slots[slotIndex];
+        if (!brush || !slot) return;
+        const sourceImage = brush.querySelector('img');
+        const targetImage = slot.querySelector('img');
+        targetImage.src = sourceImage.src;
+        targetImage.alt = sourceImage.alt;
+        slot.classList.add('is-filled');
+        slot.classList.remove('is-target');
+      };
+
+      const stopAuto = () => {
+        runId += 1;
+        window.clearTimeout(timer);
+        if (runningAnimation) runningAnimation.cancel();
+        runningAnimation = null;
+        floating.style.visibility = 'hidden';
+        floating.style.opacity = '0';
+        brushes.forEach((brush) => brush.classList.remove('is-dragging'));
+        slots.forEach((slot) => slot.classList.remove('is-target'));
+      };
+
+      const animateBrushToSlot = async (brushIndex, slotIndex, id) => {
+        const brush = brushes[brushIndex];
+        const slot = slots[slotIndex];
+        if (!brush || !slot || id !== runId) return false;
+        const sourceImage = brush.querySelector('img');
+        const demoRect = demo.getBoundingClientRect();
+        const sourceRect = brush.getBoundingClientRect();
+        const targetRect = slot.getBoundingClientRect();
+        const floatSize = floating.offsetWidth || 48;
+        const startX = sourceRect.left - demoRect.left + (sourceRect.width - floatSize) / 2;
+        const startY = sourceRect.top - demoRect.top + (sourceRect.height - floatSize) / 2;
+        const endX = targetRect.left - demoRect.left + (targetRect.width - floatSize) / 2;
+        const endY = targetRect.top - demoRect.top + (targetRect.height - floatSize) / 2;
+
+        floatingImage.src = sourceImage.src;
+        floating.style.visibility = 'visible';
+        brush.classList.add('is-dragging');
+        slot.classList.add('is-target');
+        runningAnimation = floating.animate([
+          { transform: `translate(${startX}px, ${startY}px) scale(1)`, opacity: 1 },
+          { transform: `translate(${startX}px, ${startY}px) scale(1)`, opacity: 1, offset: .14 },
+          { transform: `translate(${endX}px, ${endY}px) scale(1.06)`, opacity: 1, offset: .82 },
+          { transform: `translate(${endX}px, ${endY}px) scale(1)`, opacity: 1 }
+        ], { duration: 1250, easing: 'cubic-bezier(.3,.72,.25,1)', fill: 'forwards' });
+
+        try { await runningAnimation.finished; } catch (_) { return false; }
+        if (id !== runId) return false;
+        fillSlot(brushIndex, slotIndex);
+        brush.classList.remove('is-dragging');
+        floating.style.visibility = 'hidden';
+        runningAnimation = null;
+        return true;
+      };
+
+      const runStep = async () => {
+        const id = runId;
+        if (!demo.isConnected || document.hidden) {
+          timer = window.setTimeout(runStep, 700);
+          return;
+        }
+        if (step === 0) resetSlots();
+        const completed = await animateBrushToSlot(step, step, id);
+        if (!completed || id !== runId) return;
+        step = (step + 1) % brushes.length;
+        timer = window.setTimeout(runStep, step === 0 ? 1500 : 260);
+      };
+
+      brushes.forEach((brush, brushIndex) => {
+        brush.addEventListener('dragstart', (event) => {
+          stopAuto();
+          event.dataTransfer.effectAllowed = 'copy';
+          event.dataTransfer.setData('text/plain', String(brushIndex));
+          brush.classList.add('is-dragging');
+        });
+        brush.addEventListener('dragend', () => brush.classList.remove('is-dragging'));
+      });
+
+      slots.forEach((slot, slotIndex) => {
+        slot.addEventListener('dragover', (event) => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'copy';
+          slot.classList.add('is-target');
+        });
+        slot.addEventListener('dragleave', () => slot.classList.remove('is-target'));
+        slot.addEventListener('drop', (event) => {
+          event.preventDefault();
+          const brushIndex = Number(event.dataTransfer.getData('text/plain'));
+          slots.forEach((item) => item.classList.remove('is-target'));
+          if (Number.isInteger(brushIndex)) fillSlot(brushIndex, slotIndex);
+          step = (slotIndex + 1) % brushes.length;
+          timer = window.setTimeout(() => { runId += 1; runStep(); }, 2200);
+        });
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stopAuto();
+        else {
+          step = 0;
+          timer = window.setTimeout(runStep, 500);
+        }
+      });
+
+      if (reduceMotion) {
+        brushes.forEach((_, index) => fillSlot(index, index));
+      } else {
+        timer = window.setTimeout(runStep, 700);
+      }
+    })();
+  </script>
+</body>
+</html>
