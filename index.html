@@ -159,7 +159,7 @@
     .media-label { position: absolute; left: 18px; bottom: 18px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.16); border-radius: 6px; color: #e7e3dc; background: rgba(9,9,10,.78); font: 11px ui-monospace, monospace; letter-spacing: .08em; }
     .section { padding: 104px 0; border-top: 1px solid var(--line); }
     .section-head { display: flex; align-items: end; justify-content: space-between; gap: 36px; margin-bottom: 34px; }
-    .section-head h2 span, .install-card h2 span { color: var(--orange); }
+    .section-head h2 span { color: var(--orange); }
     h2 { max-width: 650px; margin: 0; color: #fff; font-family: "Poppins", sans-serif; font-size: clamp(30px, 3vw, 40px); font-weight: 500; line-height: 1.15; letter-spacing: -.025em; }
     .section .eyebrow { margin-bottom: 12px; color: var(--orange); font-family: "Poppins", sans-serif; font-size: 14px; font-weight: 600; letter-spacing: .18em; line-height: 1.25; text-transform: uppercase; }
     .workspace-eyebrow { margin-bottom: 12px; color: var(--orange); font-family: "Poppins", sans-serif; font-size: 14px; font-weight: 600; letter-spacing: .18em; line-height: 1.25; text-transform: uppercase; }
@@ -677,9 +677,6 @@
     .how-ui-status { display: inline-flex; align-items: center; gap: 6px; color: #cbd0d4; font: 600 9px/1 "CG Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
     .how-ui-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 9px rgba(255,101,20,.6); }
     .how-key { display: inline-grid; min-width: 42px; height: 32px; place-items: center; border: 1px solid #4a4e53; border-radius: 5px; color: #fff; background: #27292d; font: 700 11px/1 "CG Geist Mono", monospace; box-shadow: inset 0 -2px #151619; }
-    .install-card { display: flex; align-items: center; justify-content: space-between; gap: 30px; padding: 42px; border: 1px solid var(--line); border-radius: 11px; background: #111113; box-shadow: none; }
-    .install-card h2 { max-width: 650px; }
-    .install-card p { max-width: 530px; margin: 15px 0 0; color: var(--muted); font-size: 14px; }
     footer { display: flex; justify-content: space-between; gap: 20px; padding: 26px 0 36px; color: var(--muted); font-size: 12px; }
     .mono { font-family: "CG Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
     @media (max-width: 860px) {
@@ -704,8 +701,6 @@
       .editor-capability-card.span-3, .editor-capability-card.span-2, .editor-capability-card.span-4 { grid-column: span 6; }
       .section-head { display: block; }
       .section-head > p { margin-top: 18px; }
-      .install-card { display: block; }
-      .install-card .button { margin-top: 25px; }
       .how-steps { grid-template-columns: 1fr; }
       .how-steps::before { top: 45px; bottom: 45px; left: 42px; right: auto; width: 1px; height: auto; background: repeating-linear-gradient(180deg,rgba(255,101,20,.62) 0 8px,transparent 8px 14px); }
       .how-step { min-height: 0; }
@@ -715,7 +710,6 @@
       nav { height: 66px; }
       .nav-links { display: none; }
       .section { padding: 72px 0; }
-      .install-card { padding: 28px; }
       .how-step { padding: 28px 24px 24px; }
       footer { display: block; }
       footer span { display: block; margin-top: 8px; }
@@ -803,7 +797,7 @@
         <a href="#how">How it works</a>
         <a href="#workflow">Workflow</a>
       </div>
-      <a class="nav-button" href="#install">Install guide</a>
+      <a class="nav-button" href="#how">Install guide</a>
     </nav>
   </header>
 
@@ -1029,17 +1023,6 @@
       </div>
     </section>
 
-    <section class="section" id="install">
-      <div class="wrap">
-        <div class="install-card">
-          <div>
-            <h2>Make your next sculpt <span>feel lighter.</span></h2>
-            <p>Install Sculpt-Wheel and bring a faster brush workflow into Blender 4.3 and newer.</p>
-          </div>
-          <a class="button primary" href="#how">See how it works <span>-&gt;</span></a>
-        </div>
-      </div>
-    </section>
   </main>
 
  <footer class="wrap"><span> © 2026 Sculpt-Wheel | CG Guides</span><span class="mono">Sculpt-Wheel v-1.0.010 | BLENDER 4.3+</span></footer>
