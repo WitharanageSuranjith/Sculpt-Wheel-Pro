@@ -823,6 +823,102 @@
       .bridge-link { width: 54px; justify-self: center; transform: rotate(90deg); }
       .bridge-link-label, .bridge-link-state { display: none; }
     }
+
+    /* Mobile layout: keep every product surface readable without horizontal scrolling. */
+    @media (max-width: 640px) {
+      :root { --mobile-gutter: 18px; }
+      html { scroll-padding-top: 64px; }
+      body { overflow-wrap: anywhere; }
+      body::before { background-size: 34px 34px; }
+      .wrap { width: calc(100% - (var(--mobile-gutter) * 2)); }
+
+      nav { height: 64px; gap: 10px; }
+      main { padding-top: 64px; }
+      .brand { min-width: 0; gap: 8px; font-size: 14px; letter-spacing: .08em; }
+      .brand img { width: 32px; height: 32px; flex: 0 0 32px; }
+      .brand span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .nav-button { min-height: 40px; flex: 0 0 auto; display: inline-flex; align-items: center; padding: 8px 11px; font-size: 11px; }
+
+      .hero { display: flex; min-height: 0; flex-direction: column; gap: 20px; padding: 48px 0 62px; }
+      .hero-copy { order: 1; width: 100%; }
+      .hero > .visual { order: 2; width: 100%; }
+      .hero-eyebrow { max-width: 100%; padding: 6px 9px; font-size: 10px; letter-spacing: .1em; }
+      h1 { max-width: 100%; margin: 18px 0; font-size: clamp(35px, 11.4vw, 46px); line-height: .98; }
+      .lead { font-size: 15px; line-height: 1.65; }
+      .hero .actions { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 25px; }
+      .hero .actions .button { width: 100%; min-height: 48px; justify-content: center; }
+      .hero-features { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 16px; margin-top: 38px; }
+      .hero-feature strong { font-size: 12px; white-space: normal; }
+      .hero-feature small { font-size: 9px; }
+      .compat { align-items: flex-start; margin-top: 24px; font-size: 10px; line-height: 1.5; }
+      .compat i { flex: 0 0 7px; margin-top: 4px; }
+      .hero-wheel-stage { width: 100%; min-height: 370px; overflow: hidden; }
+      .hero-wheel.wheel-ring { transform: translate(-50%,-50%) scale(.6); }
+
+      .section { padding: 64px 0; }
+      .section-head { margin-bottom: 26px; }
+      .section-head h2, .workspace-title, .checkout-picker h2 { font-size: clamp(27px, 8.5vw, 36px); line-height: 1.14; }
+      .section .eyebrow, .workspace-eyebrow { font-size: 11px; letter-spacing: .14em; }
+      .section-head > p { margin-top: 14px; font-size: 13px; line-height: 1.65; }
+
+      .blender-ui { border-radius: 8px; }
+      .blender-topbar { gap: 9px; padding-inline: 8px; font-size: 8px; }
+      .blender-topbar .blender-menu:nth-of-type(n+4) { display: none; }
+      .blender-workbar, .blender-tool-settings { min-width: 0; overflow: hidden; padding-inline: 8px; }
+      .blender-main { min-height: 390px; height: 116vw; max-height: 500px; flex-basis: auto; }
+      .blender-tools { left: 5px; grid-template-columns: repeat(2, 23px); gap: 3px; }
+      .blender-model { width: 96px; height: 96px; }
+      .brush-library-hint { min-width: 0; width: calc(100% - 130px); font-size: 12px; }
+      .wheel-ring { transform: translate(-50%,-50%) scale(.68); }
+      .demo-caption { padding: 14px 2px 0; font-size: 11px; }
+
+      .feature-mosaic { row-gap: 12px; }
+      .sw-feature-card:nth-child(n) { height: auto; min-height: 0; border-radius: 14px; }
+      .sw-feature-inner { gap: 14px; padding: 44px 20px 22px; }
+      .sw-feature-card h3 { font-size: clamp(23px, 7vw, 29px); line-height: 1.12; }
+      .sw-feature-copy > p:last-child { font-size: 13px; line-height: 1.65; }
+      .sw-feature-visual, .sub-feature-visual { min-height: 220px; }
+      .sw-editor-feature-card .sw-feature-visual { min-height: 568px; }
+      .editor-dnd-demo { height: 568px; gap: 8px; }
+      .editor-dnd-panel { min-height: 268px; }
+      .editor-dnd-library-panel { transform: scale(.94); }
+      .bridge-visual { min-height: 380px; }
+
+      .how-step { min-height: 0; padding: 26px 20px 22px; }
+      .how-step-visual { min-height: 135px; margin-top: 26px; }
+      .how-ui-row { gap: 8px; }
+      .how-ui-row > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .how-ui-chip, .how-ui-action, .how-key { flex: 0 0 auto; }
+
+      .checkout-picker p { font-size: 12px; line-height: 1.65; }
+      .checkout-links { gap: 9px; margin-top: 24px; }
+      .checkout-link { min-height: 64px; gap: 9px; padding: 10px 13px; }
+      .checkout-link strong { min-width: 0; font-size: 13px; }
+      .checkout-link span { max-width: 108px; font-size: 9px; line-height: 1.35; text-align: right; }
+
+      footer { padding-bottom: max(30px, env(safe-area-inset-bottom)); font-size: 10px; line-height: 1.6; }
+    }
+
+    @media (max-width: 380px) {
+      :root { --mobile-gutter: 15px; }
+      .brand { font-size: 12px; letter-spacing: .055em; }
+      .brand img { width: 30px; height: 30px; flex-basis: 30px; }
+      .nav-button { min-height: 38px; padding-inline: 9px; font-size: 10px; }
+      h1 { font-size: 34px; }
+      .hero-wheel-stage { min-height: 330px; }
+      .hero-wheel.wheel-ring { transform: translate(-50%,-50%) scale(.52); }
+      .hero-features { gap-inline: 12px; }
+      .sw-feature-inner { padding-inline: 17px; }
+      .fm-wheel, .sub-feature-wheel { transform: translate(-50%,-50%) scale(.88); }
+      .editor-dnd-library-panel { transform: scale(.88); }
+      .checkout-link span { max-width: 92px; }
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      .button, .nav-button, .checkout-link, .experience-tab { -webkit-tap-highlight-color: transparent; }
+      .button:active, .nav-button:active, .checkout-link:active { transform: scale(.98); }
+      .editor-dnd-library-item { cursor: default; }
+    }
   </style>
 </head>
 <body>
@@ -1379,8 +1475,11 @@
         brushLibraryHint.classList.add('hidden');
         if (event.target.closest('.sculpt-panel, .brush-shelf, .viewport-gizmo')) return;
         const rect = viewport.getBoundingClientRect();
-        const x = Math.max(190, Math.min(rect.width - 190, event.clientX - rect.left));
-        const y = Math.max(190, Math.min(rect.height - 190, event.clientY - rect.top));
+        const wheelMargin = Math.min(190, Math.max(110, Math.min(rect.width, rect.height) * .34));
+        const xMargin = Math.min(wheelMargin, rect.width / 2);
+        const yMargin = Math.min(wheelMargin, rect.height / 2);
+        const x = Math.max(xMargin, Math.min(rect.width - xMargin, event.clientX - rect.left));
+        const y = Math.max(yMargin, Math.min(rect.height - yMargin, event.clientY - rect.top));
         overlay.style.setProperty('--wheel-x', `${x}px`);
         overlay.style.setProperty('--wheel-y', `${y}px`);
         const open = overlay.classList.toggle('open');
