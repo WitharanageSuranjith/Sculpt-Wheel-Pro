@@ -715,6 +715,24 @@
     .checkout-link small { color: var(--orange); font: 700 9px/1 "CG Geist Mono", monospace; letter-spacing: .12em; }
     .checkout-link strong { flex: 1; color: #f7f5f1; font-size: 14px; }
     .checkout-link span { color: var(--orange); font: 11px/1 "CG Geist Mono", monospace; }
+    .inline-page-section { display: none; padding: 112px 0; border-top: 1px solid var(--line); }
+    .inline-page-section.active { display: block; }
+    body.inline-route main > :not(.inline-page-section) { display: none; }
+    body.inline-route footer { display: none; }
+    .inline-page-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin-top: 38px; }
+    .inline-page-card { min-height: 210px; display: flex; flex-direction: column; padding: 24px; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(145deg,#191a1d,#101113); }
+    .inline-page-card small { color: var(--orange); font: 600 10px/1 "CG Geist Mono", monospace; letter-spacing: .14em; }
+    .inline-page-card h3 { margin: 34px 0 9px; font-size: 21px; }
+    .inline-page-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .inline-page-badge { display: inline-flex; width: fit-content; margin-top: auto; padding: 6px 9px; border: 1px solid rgba(255,101,20,.45); border-radius: 5px; color: var(--orange); font: 600 9px/1 "CG Geist Mono", monospace; text-transform: uppercase; }
+    .inline-contact-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 54px; align-items: start; margin-top: 34px; }
+    .inline-contact-copy { color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .inline-contact-email { display: inline-block; margin-top: 16px; color: var(--orange); font-size: 13px; }
+    .inline-contact-form { display: grid; gap: 12px; padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: #151618; }
+    .inline-contact-form label { color: #d8d9dc; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+    .inline-contact-form input, .inline-contact-form textarea { width: 100%; margin-top: 6px; padding: 10px 12px; border: 1px solid #383c42; border-radius: 5px; outline: none; color: var(--text); background: #0f1012; font: 12px Poppins,sans-serif; }
+    .inline-contact-form textarea { min-height: 110px; resize: vertical; }
+    .inline-contact-form button { width: fit-content; padding: 10px 15px; border: 0; border-radius: 5px; color: #17100a; background: var(--orange); font-size: 11px; font-weight: 600; cursor: pointer; }
     .compat-card { display: grid; grid-template-columns: minmax(0,1.08fr) minmax(360px,.92fr); align-items: center; gap: 48px; padding: 42px 56px; border: 1px solid rgba(255,101,20,.42); border-radius: 18px; background: linear-gradient(110deg,rgba(73,39,24,.34),rgba(21,23,27,.96) 58%); box-shadow: inset 0 1px rgba(255,255,255,.04); }
     .compat-eyebrow { display: flex; align-items: center; gap: 9px; margin-bottom: 17px; color: var(--orange); font: 700 11px/1 "CG Geist Mono", monospace; letter-spacing: .19em; text-transform: uppercase; }
     .compat-eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 10px rgba(255,101,20,.75); }
@@ -874,6 +892,9 @@
       .fm-native .fm-wheel { transform: scale(.85); }
 
       .section { padding: 64px 0; }
+      .inline-page-section { padding: 72px 0; }
+      .inline-page-grid, .inline-contact-grid { grid-template-columns: 1fr; gap: 12px; }
+      .inline-page-card { min-height: 170px; }
       .section-head { margin-bottom: 26px; }
       .section-head h2, .workspace-title, .checkout-picker h2 { font-size: clamp(27px, 8.5vw, 36px); line-height: 1.14; }
       .section .eyebrow, .workspace-eyebrow { font-size: 11px; letter-spacing: .14em; }
@@ -943,13 +964,16 @@
 <body>
   <header class="nav-shell">
     <nav class="wrap" aria-label="Main navigation">
-      <a class="brand" href="index.html"><img src="assets/icon.png" alt="" /><span>SCULPT<em>-WHEEL</em></span></a>
+      <a class="brand" href="#top"><img src="assets/icon.png" alt="" /><span>SCULPT<em>-WHEEL</em></span></a>
 
 
       <div class="nav-links">
         <a href="#workspace">Workspace</a>
         <a href="#features">Features</a>
+        <a href="#buy">Get it</a>
         <a href="#how">How it works</a>
+        <a href="#brushes">Brushes</a>
+        <a href="#contact">Contact</a>
       </div>
       <a class="nav-button" href="#how">Install guide</a>
     </nav>
@@ -1128,7 +1152,7 @@
 
 
    
-    <section class="section payment-section" aria-label="Payment providers">
+    <section class="section payment-section" id="buy" aria-label="Payment providers">
       <div class="wrap">
         <div class="checkout-picker">
           <div class="eyebrow">Choose your checkout</div><h2>Pick a store. <span>Get sculpting.</span></h2><p>Purchase Sculpt-Wheel from the provider you already use, then download the Blender add-on.</p>
@@ -1162,6 +1186,17 @@
           </article>
         </div>
       </div>
+    </section>
+
+    <section class="inline-page-section" id="brushes">
+      <div class="wrap">
+        <div class="eyebrow">Brushes</div>
+        <div class="section-head"><div><h2>Build your perfect <span>brush shelf.</span></h2></div><p>Curated brush packs for Sculpt-Wheel are coming next. Keep your favorite tools organized and drop every pack straight into your wheel.</p></div>
+        <div class="inline-page-grid"><article class="inline-page-card"><small>01 · FOUNDATION</small><h3>Core Sculpt Set</h3><p>Reliable everyday brushes for shaping, smoothing, inflating, and refining forms.</p><span class="inline-page-badge">Coming soon</span></article><article class="inline-page-card"><small>02 · DETAIL</small><h3>Surface Detail Pack</h3><p>Focused tools for pores, creases, sharp transitions, and controlled surface work.</p><span class="inline-page-badge">Coming soon</span></article><article class="inline-page-card"><small>03 · COMMUNITY</small><h3>Creator Collections</h3><p>Specialized brush libraries built by artists and ready for your own wheel layout.</p><span class="inline-page-badge">Coming soon</span></article></div>
+      </div>
+    </section>
+    <section class="inline-page-section" id="contact">
+      <div class="wrap"><div class="eyebrow">Contact</div><div class="inline-contact-grid"><div><h2>Let’s keep the <span>flow.</span></h2><p class="inline-contact-copy">Questions about Sculpt-Wheel, brush libraries, licensing, or future releases? Send us a message and we’ll get back to you.</p><a class="inline-contact-email" href="mailto:hello@cgguides.com">hello@cgguides.com</a></div><form class="inline-contact-form" action="mailto:hello@cgguides.com" method="post" enctype="text/plain"><label>Name<input name="name" autocomplete="name" required /></label><label>Email<input name="email" type="email" autocomplete="email" required /></label><label>Message<textarea name="message" required></textarea></label><button type="submit">Send message →</button></form></div></div>
     </section>
 
   </main>
@@ -1759,6 +1794,22 @@
       } else {
         timer = window.setTimeout(runStep, 700);
       }
+    })();
+  </script>
+  <script>
+    (() => {
+      const routes = new Set(['brushes', 'contact']);
+      const updateInlineRoute = () => {
+        const route = window.location.hash.slice(1).toLowerCase();
+        const isInlineRoute = routes.has(route);
+        document.body.classList.toggle('inline-route', isInlineRoute);
+        document.querySelectorAll('.inline-page-section').forEach((section) => {
+          section.classList.toggle('active', isInlineRoute && section.id === route);
+        });
+        if (isInlineRoute) window.scrollTo(0, 0);
+      };
+      window.addEventListener('hashchange', updateInlineRoute);
+      updateInlineRoute();
     })();
   </script>
 </body>
