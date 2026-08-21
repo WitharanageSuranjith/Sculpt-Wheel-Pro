@@ -5,12 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0a0a0b" />
   <meta name="description" content="Sculpt-Wheel is a fast radial brush workflow for Blender sculptors." />
+  <link rel="canonical" href="https://sculpt-wheel.cgguides.com/" />
   <title>Sculpt-Wheel | One gesture away</title>
   <link rel="icon" type="image/png" href="assets/icon.png" />
+  <!-- Load the visible hero artwork before the rest of the page paints. -->
+  <link rel="preload" as="image" href="assets/sculpt-wheel/brush-icons/default/Clay.png" />
+  <link rel="preload" as="image" href="assets/sculpt-wheel/brush-icons/default/Draw%20Sharp.png" />
+  <link rel="preload" as="image" href="assets/sculpt-wheel/brush-icons/default/Clay_Buildup.png" />
+  <link rel="preload" as="image" href="assets/sculpt-wheel/brush-icons/default/Move.png" />
+  <link rel="preload" as="image" href="assets/sculpt-wheel/brush-icons/default/Blob.png" />
+  <link rel="preload" as="image" href="assets/sculpt-wheel/brush-icons/default/Inflate.png" />
+  <link rel="preload" as="image" href="assets/sculpt-wheel/brush-icons/default/Crease_Sharp.png" />
+  <link rel="preload" as="image" href="assets/sculpt-wheel/brush-icons/default/Standard.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script>
+    // Keep the public URL clean when somebody opens the GitHub Pages file URL.
+    // GitHub Pages serves index.html automatically at the domain root, but it
+    // does not provide server-side rewrites for /index.html.
+    if (window.location.pathname.endsWith('/index.html')) {
+      const cleanPath = window.location.pathname.slice(0, -'index.html'.length) || '/';
+      window.history.replaceState(null, document.title, cleanPath + window.location.search + window.location.hash);
+    }
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     const resetPageScroll = () => {
       const root = document.documentElement;
@@ -408,11 +425,11 @@
     .blender-viewport::after { content: none; }
     .wheel-overlay { position: absolute; inset: 0; z-index: 10; background: rgba(8,10,12,.08); opacity: 0; pointer-events: none; transition: opacity .16s ease; }
     .wheel-overlay.open { opacity: 1; pointer-events: auto; background: rgba(8,10,12,.28); }
-    .wheel-ring { position: absolute; left: var(--wheel-x, 50%); top: var(--wheel-y, 50%); width: 380px; height: 380px; transform: translate(-50%,-50%) scale(.8); transform-origin: center; border-radius: 50%; will-change: transform; }
+    .wheel-ring { --wheel-scale: .8; position: absolute; left: var(--wheel-x, 50%); top: var(--wheel-y, 50%); width: 380px; height: 380px; transform: translate(-50%,-50%) scale(var(--wheel-scale)); transform-origin: center; border-radius: 50%; will-change: transform; }
     .wheel-overlay.open .wheel-ring { animation: sculpt-wheel-open .16s cubic-bezier(.2,.8,.2,1) both; }
     @keyframes sculpt-wheel-open {
       from { transform: translate(-50%,-50%) scale(.15); opacity: 0; }
-      to { transform: translate(-50%,-50%) scale(.8); opacity: 1; }
+      to { transform: translate(-50%,-50%) scale(var(--wheel-scale)); opacity: 1; }
     }
     .wheel-ring::before { content: none; }
     .wheel-ring::after { content: none; }
@@ -841,19 +858,20 @@
 
       .hero { display: flex; min-height: 0; flex-direction: column; gap: 20px; padding: 48px 0 62px; }
       .hero-copy { order: 1; width: 100%; }
-      .hero > .visual { order: 2; width: 100%; }
+      .hero > .visual { order: -1; width: 100%; }
       .hero-eyebrow { max-width: 100%; padding: 6px 9px; font-size: 10px; letter-spacing: .1em; }
       h1 { max-width: 100%; margin: 18px 0; font-size: clamp(35px, 11.4vw, 46px); line-height: .98; }
       .lead { font-size: 15px; line-height: 1.65; }
       .hero .actions { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 25px; }
       .hero .actions .button { width: 100%; min-height: 48px; justify-content: center; }
-      .hero-features { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 16px; margin-top: 38px; }
+      .hero-features { display: none; }
       .hero-feature strong { font-size: 12px; white-space: normal; }
       .hero-feature small { font-size: 9px; }
       .compat { align-items: flex-start; margin-top: 24px; font-size: 10px; line-height: 1.5; }
       .compat i { flex: 0 0 7px; margin-top: 4px; }
       .hero-wheel-stage { width: 100%; min-height: 370px; overflow: hidden; }
-      .hero-wheel.wheel-ring { transform: translate(-50%,-50%) scale(.6); }
+      .hero-wheel.wheel-ring { transform: translate(-50%,-50%) scale(.504); }
+      .fm-native .fm-wheel { transform: scale(.85); }
 
       .section { padding: 64px 0; }
       .section-head { margin-bottom: 26px; }
@@ -869,7 +887,7 @@
       .blender-tools { left: 5px; grid-template-columns: repeat(2, 23px); gap: 3px; }
       .blender-model { width: 96px; height: 96px; }
       .brush-library-hint { min-width: 0; width: calc(100% - 130px); font-size: 12px; }
-      .wheel-ring { transform: translate(-50%,-50%) scale(.68); }
+      .wheel-ring { --wheel-scale: .6; transform: translate(-50%,-50%) scale(var(--wheel-scale)); }
       .demo-caption { padding: 14px 2px 0; font-size: 11px; }
 
       .feature-mosaic { row-gap: 12px; }
@@ -878,6 +896,7 @@
       .sw-feature-card h3 { font-size: clamp(23px, 7vw, 29px); line-height: 1.12; }
       .sw-feature-copy > p:last-child { font-size: 13px; line-height: 1.65; }
       .sw-feature-visual, .sub-feature-visual { min-height: 220px; }
+      .sub-feature-wheel { left: 36%; }
       .sw-editor-feature-card .sw-feature-visual { min-height: 568px; }
       .editor-dnd-demo { height: 568px; gap: 8px; }
       .editor-dnd-panel { min-height: 268px; }
@@ -906,7 +925,7 @@
       .nav-button { min-height: 38px; padding-inline: 9px; font-size: 10px; }
       h1 { font-size: 34px; }
       .hero-wheel-stage { min-height: 330px; }
-      .hero-wheel.wheel-ring { transform: translate(-50%,-50%) scale(.52); }
+      .hero-wheel.wheel-ring { transform: translate(-50%,-50%) scale(.441); }
       .hero-features { gap-inline: 12px; }
       .sw-feature-inner { padding-inline: 17px; }
       .fm-wheel, .sub-feature-wheel { transform: translate(-50%,-50%) scale(.88); }
@@ -954,7 +973,7 @@
       <div class="visual">
         <div class="media-frame hero-media"><div class="hero-wheel-stage"><div class="hero-wheel">
           <span class="hero-wheel-line" style="--angle:0deg"></span><span class="hero-wheel-line" style="--angle:45deg"></span><span class="hero-wheel-line" style="--angle:90deg"></span><span class="hero-wheel-line" style="--angle:135deg"></span><span class="hero-wheel-line" style="--angle:180deg"></span><span class="hero-wheel-line" style="--angle:225deg"></span><span class="hero-wheel-line" style="--angle:270deg"></span><span class="hero-wheel-line" style="--angle:315deg"></span>
-          <span class="hero-wheel-slot" style="--angle:0deg"><img src="assets/sculpt-wheel/brush-icons/default/Clay.png" alt="Clay" /></span><span class="hero-wheel-slot" style="--angle:45deg"><img src="assets/sculpt-wheel/brush-icons/default/Draw%20Sharp.png" alt="Draw Sharp" /></span><span class="hero-wheel-slot" style="--angle:90deg"><img src="assets/sculpt-wheel/brush-icons/default/Clay_Buildup.png" alt="Clay Buildup" /></span><span class="hero-wheel-slot" style="--angle:135deg"><img src="assets/sculpt-wheel/brush-icons/default/Move.png" alt="Move" /></span><span class="hero-wheel-slot" style="--angle:180deg"><img src="assets/sculpt-wheel/brush-icons/default/Blob.png" alt="Blob" /></span><span class="hero-wheel-slot" style="--angle:225deg"><img src="assets/sculpt-wheel/brush-icons/default/Inflate.png" alt="Inflate" /></span><span class="hero-wheel-slot" style="--angle:270deg"><img src="assets/sculpt-wheel/brush-icons/default/Crease_Sharp.png" alt="Crease" /></span><span class="hero-wheel-slot" style="--angle:315deg"><img src="assets/sculpt-wheel/brush-icons/default/Standard.png" alt="Standard" /></span>
+          <span class="hero-wheel-slot" style="--angle:0deg"><img src="assets/sculpt-wheel/brush-icons/default/Clay.png" alt="Clay" loading="eager" fetchpriority="high" decoding="sync" /></span><span class="hero-wheel-slot" style="--angle:45deg"><img src="assets/sculpt-wheel/brush-icons/default/Draw%20Sharp.png" alt="Draw Sharp" loading="eager" fetchpriority="high" decoding="sync" /></span><span class="hero-wheel-slot" style="--angle:90deg"><img src="assets/sculpt-wheel/brush-icons/default/Clay_Buildup.png" alt="Clay Buildup" loading="eager" fetchpriority="high" decoding="sync" /></span><span class="hero-wheel-slot" style="--angle:135deg"><img src="assets/sculpt-wheel/brush-icons/default/Move.png" alt="Move" loading="eager" fetchpriority="high" decoding="sync" /></span><span class="hero-wheel-slot" style="--angle:180deg"><img src="assets/sculpt-wheel/brush-icons/default/Blob.png" alt="Blob" loading="eager" fetchpriority="high" decoding="sync" /></span><span class="hero-wheel-slot" style="--angle:225deg"><img src="assets/sculpt-wheel/brush-icons/default/Inflate.png" alt="Inflate" loading="eager" fetchpriority="high" decoding="sync" /></span><span class="hero-wheel-slot" style="--angle:270deg"><img src="assets/sculpt-wheel/brush-icons/default/Crease_Sharp.png" alt="Crease" loading="eager" fetchpriority="high" decoding="sync" /></span><span class="hero-wheel-slot" style="--angle:315deg"><img src="assets/sculpt-wheel/brush-icons/default/Standard.png" alt="Standard" loading="eager" fetchpriority="high" decoding="sync" /></span>
           <span class="hero-wheel-label" style="--angle:0deg">Clay</span><span class="hero-wheel-label" style="--angle:45deg">Draw Sharp</span><span class="hero-wheel-label" style="--angle:90deg">Clay Buildup</span><span class="hero-wheel-label" style="--angle:135deg">Move</span><span class="hero-wheel-label" style="--angle:180deg">Blob</span><span class="hero-wheel-label" style="--angle:225deg">Inflate</span><span class="hero-wheel-label" style="--angle:270deg">Crease</span><span class="hero-wheel-label" style="--angle:315deg">Standard</span>
           <span class="hero-wheel-center"></span>
         </div></div></div>
