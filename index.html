@@ -100,6 +100,21 @@
     .nav-links a:hover { color: var(--text); }
     .nav-button { border: 1px solid var(--line); border-radius: 7px; padding: 10px 15px; color: var(--text); background: var(--surface); font: inherit; font-size: 13px; cursor: pointer; appearance: none; }
     .nav-button:hover { border-color: rgba(255,255,255,.32); }
+    .nav-menu-toggle, .mobile-nav { display: none; }
+    .nav-menu-toggle { width: 40px; height: 38px; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 7px; color: var(--text); background: var(--surface); cursor: pointer; }
+    .nav-menu-toggle span, .nav-menu-toggle span::before, .nav-menu-toggle span::after { display: block; width: 16px; height: 1px; background: currentColor; transition: transform .18s ease, opacity .18s ease; }
+    .nav-menu-toggle span { position: relative; }
+    .nav-menu-toggle span::before, .nav-menu-toggle span::after { position: absolute; left: 0; content: ""; }
+    .nav-menu-toggle span::before { top: -5px; }
+    .nav-menu-toggle span::after { top: 5px; }
+    .nav-shell.menu-open .nav-menu-toggle span { background: transparent; }
+    .nav-shell.menu-open .nav-menu-toggle span::before { transform: translateY(5px) rotate(45deg); }
+    .nav-shell.menu-open .nav-menu-toggle span::after { transform: translateY(-5px) rotate(-45deg); }
+    .mobile-nav { border-top: 1px solid var(--line); padding: 10px 0 16px; background: rgba(9,9,10,.98); }
+    .mobile-nav a { display: block; padding: 10px 0; color: var(--muted); font-size: 13px; }
+    .mobile-nav a:hover { color: var(--text); }
+    .mobile-nav .nav-button { width: 100%; margin-top: 8px; }
+    .nav-shell.menu-open .mobile-nav { display: block; }
     .hero { min-height: 760px; display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: 54px; padding: 84px 0 100px; }
     .hero-copy { grid-column: 1; grid-row: 1; }
     .hero > .visual { grid-column: 2; grid-row: 1; }
@@ -321,7 +336,7 @@
       .editor-capability-card:nth-child(3) .cap-visual,
       .editor-capability-card:nth-child(4) .cap-visual { height: 250px; margin-top: auto; }
     }
-    @media (prefers-reduced-motion: reduce) { .editor-capability-card, .cap-wheel > .cap-brush, .cap-drag-brush, .cap-sub-main, .cap-sub-child, .cap-sub-label, .cap-sub-link, .cap-native-transfer::before, .cap-native-active { animation:none !important; } }
+    @media (prefers-reduced-motion: reduce) { .editor-capability-card, .cap-wheel > .cap-brush, .cap-drag-brush, .cap-sub-main, .cap-sub-child, .cap-sub-label, .cap-sub-link, .cap-native-transfer::before, .cap-native-active, .fm-ray::after, .fm-brush, .sub-feature-ray::after, .sub-feature-brush { animation:none !important; } }
     .workspace-demo { overflow: hidden; border: 1px solid rgba(255,255,255,.14); border-radius: 12px; background: #0b0e11; box-shadow: 0 30px 90px rgba(0,0,0,.5); }
     .zb-menubar { display: flex; gap: 15px; overflow: hidden; padding: 9px 14px; border-bottom: 1px solid #293038; color: #949da5; background: #10151a; font: 10px ui-monospace, monospace; white-space: nowrap; }
     .zb-menubar-item:hover { color: var(--orange-soft); }
@@ -576,21 +591,29 @@
     .editor-dnd-drag { position: absolute; left: 0; top: 0; z-index: 20; display: grid; width: 48px; height: 48px; place-items: center; padding: 5px; border: 2px solid var(--orange); border-radius: 50%; background: #242629; opacity: 0; visibility: hidden; pointer-events: none; box-shadow: 0 10px 24px rgba(0,0,0,.55), 0 0 18px rgba(255,101,20,.3); will-change: transform, opacity; }
     .editor-dnd-drag img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .fm-wheel { position: absolute; left: 50%; top: 50%; width: 230px; height: 230px; transform: translate(-50%,-50%); }
+    .fm-wheel { --pulse-duration: 5.6s; }
+    .fm-wheel .fm-ray::after { animation: none; }
+    .fm-wheel .fm-ray:nth-of-type(3)::after { animation: feature-pulse-travel var(--pulse-duration) ease-in-out infinite; animation-delay: 0s; }
+    .fm-wheel .fm-brush { animation: none; }
+    .fm-wheel .fm-brush.active { animation: feature-slot-highlight var(--pulse-duration) ease-in-out infinite; animation-delay: 0s; }
     .fm-wheel::before { content: ""; position: absolute; inset: 33px; border: 1px solid rgba(255,255,255,.08); border-radius: 50%; }
     .fm-center { position: absolute; left: 50%; top: 50%; z-index: 3; width: 24px; height: 24px; border: 2px solid #4774b8; border-radius: 50%; background: #1e1e1e; transform: translate(-50%,-50%); }
     .fm-center::after { content: ""; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); transform: translate(-50%,-50%); }
-    .fm-ray { position: absolute; left: 50%; top: 50%; width: 77px; height: 1px; transform: rotate(var(--a)); transform-origin: left center; background: repeating-linear-gradient(90deg, rgba(241,118,5,.72) 0 5px, transparent 5px 9px); }
-    .fm-brush { position: absolute; left: 50%; top: 50%; z-index: 2; display: grid; width: 48px; height: 48px; place-items: center; padding: 5px; border: 1px solid #555; border-radius: 50%; background: #242424; transform: translate(-50%,-50%) rotate(var(--a)) translateY(-89px) rotate(calc(var(--a) * -1)); box-shadow: 0 8px 18px rgba(0,0,0,.34); }
+    .fm-ray { position: absolute; left: 50%; top: 50%; width: 77px; height: 1px; overflow: visible; transform: rotate(var(--a)); transform-origin: left center; background: repeating-linear-gradient(90deg, rgba(241,118,5,.72) 0 5px, transparent 5px 9px); }
+    .fm-ray::after, .sub-feature-ray::after { content: ""; position: absolute; left: 0; top: 50%; width: 18px; height: 4px; border-radius: 50%; background: radial-gradient(ellipse, #ffb06b 0 18%, var(--orange) 38%, transparent 75%); opacity: 0; transform: translate(-50%,-50%); animation: feature-pulse-travel 5.6s ease-in-out infinite; animation-delay: var(--pulse-delay, 0s); pointer-events: none; }
+    .fm-ray::after, .fm-brush { animation-duration: var(--pulse-duration); }
+    .fm-brush { position: absolute; left: 50%; top: 50%; z-index: 2; display: grid; width: 48px; height: 48px; place-items: center; padding: 5px; border: 1px solid #555; border-radius: 50%; background: #242424; transform: translate(-50%,-50%) rotate(var(--a)) translateY(-89px) rotate(calc(var(--a) * -1)); box-shadow: 0 8px 18px rgba(0,0,0,.34); animation: feature-slot-highlight 5.6s ease-in-out infinite; animation-delay: var(--pulse-delay, 0s); }
     .fm-brush img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .fm-brush.active { border: 2px solid var(--orange); }
     .fm-brush.has-sub::after { content: ""; position: absolute; right: -11px; top: 50%; width: 4px; height: 4px; border-radius: 50%; background: var(--orange); transform: translateY(-50%); }
     .sub-feature-visual { position: relative; min-width: 0; min-height: 230px; }
     .sub-feature-wheel { position: absolute; left: 25%; top: 50%; width: 230px; height: 230px; transform: translate(-50%,-50%); }
+    .sub-feature-wheel { --pulse-duration: 5.6s; }
     .sub-feature-main-brush { position: absolute; left: 50%; top: 50%; z-index: 3; display: grid; width: 48px; height: 48px; place-items: center; padding: 5px; border: 2px solid var(--orange); border-radius: 50%; background: #242424; transform: translate(-50%,-50%); box-shadow: 0 0 14px rgba(241,118,5,.18), 0 8px 18px rgba(0,0,0,.34); }
     .sub-feature-main-brush img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .sub-feature-main-brush::after { content: ""; position: absolute; right: -11px; top: 50%; width: 4px; height: 4px; border-radius: 50%; background: var(--orange); transform: translateY(-50%); box-shadow: 0 0 8px rgba(241,118,5,.55); }
-    .sub-feature-ray { position: absolute; left: 50%; top: 50%; width: 77px; height: 1px; opacity: 1; transform: rotate(var(--a)) scaleX(1); transform-origin: left center; background: repeating-linear-gradient(90deg, rgba(241,118,5,.72) 0 5px, transparent 5px 9px); }
-    .sub-feature-brush { position: absolute; left: 50%; top: 50%; z-index: 2; display: grid; width: 41px; height: 41px; place-items: center; padding: 4px; border: 1px solid #555; border-radius: 50%; background: #242424; opacity: 1; pointer-events: none; transform: translate(-50%,-50%) rotate(var(--a)) translateY(-89px) rotate(calc(var(--a) * -1)); box-shadow: 0 8px 18px rgba(0,0,0,.34); }
+    .sub-feature-ray { position: absolute; left: 50%; top: 50%; width: 77px; height: 1px; overflow: visible; opacity: 1; transform: rotate(var(--a)) scaleX(1); transform-origin: left center; background: repeating-linear-gradient(90deg, rgba(241,118,5,.72) 0 5px, transparent 5px 9px); }
+    .sub-feature-brush { position: absolute; left: 50%; top: 50%; z-index: 2; display: grid; width: 41px; height: 41px; place-items: center; padding: 4px; border: 1px solid #555; border-radius: 50%; background: #242424; opacity: 1; pointer-events: none; transform: translate(-50%,-50%) rotate(var(--a)) translateY(-89px) rotate(calc(var(--a) * -1)); box-shadow: 0 8px 18px rgba(0,0,0,.34); animation: feature-slot-highlight 5.6s ease-in-out infinite; animation-delay: var(--pulse-delay, 0s); }
     .sub-feature-brush img { display: block; width: 100%; height: 100%; object-fit: contain; }
     @keyframes sub-feature-brush-flow {
       0%, 10%, 88%, 100% { opacity: 0; transform: translate(-50%,-50%) scale(.4); }
@@ -600,6 +623,8 @@
       0%, 10%, 88%, 100% { opacity: .15; transform: rotate(var(--a)) scaleX(0); }
       28%, 72% { opacity: 1; transform: rotate(var(--a)) scaleX(1); }
     }
+    @keyframes feature-pulse-travel { 0%, 8% { left: 0; opacity: 0; } 14% { opacity: 1; } 34% { left: 100%; opacity: 1; } 42%, 100% { left: 100%; opacity: 0; } }
+    @keyframes feature-slot-highlight { 0%, 30%, 100% { border-color: #555; box-shadow: 0 8px 18px rgba(0,0,0,.34); } 34%, 44% { border-color: var(--orange); box-shadow: 0 0 0 2px rgba(255,101,20,.16), 0 0 18px rgba(255,101,20,.34), 0 8px 18px rgba(0,0,0,.34); } }
     .fm-editor { position: absolute; inset: 24px 4px 4px; display: grid; grid-template-rows: 62px 1fr; gap: 12px; }
     .fm-library { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border: 1px solid #383838; border-radius: 8px; background: #1d1d1d; }
     .fm-library img { width: 38px; height: 38px; object-fit: contain; border: 1px solid #393939; border-radius: 5px; background: #262626; }
@@ -923,9 +948,23 @@
     }
     @media (max-width: 570px) {
       .wrap { width: min(var(--max), calc(100% - 30px)); }
+      footer.site-footer { width: 100vw; margin: 26px 0 0 calc(50% - 50vw); padding: 20px 24px calc(20px + env(safe-area-inset-bottom)) !important; background: #09090a; }
+      .site-footer { text-align: center; }
+      .site-footer-brand { width: 100%; justify-content: center; }
+      .site-footer-nav { justify-content: center; width: 100%; margin-top: -4px !important; }
+      .site-footer-links { justify-content: center; gap: 12px 16px; }
+      .site-footer-meta { width: 100%; align-items: center; justify-content: center; margin-top: -6px !important; margin-left: 0; text-align: center; }
       nav { height: 66px; }
       main { padding-top: 66px; }
       .nav-links { display: none; }
+      .nav-shell > nav { position: relative; }
+      .nav-menu-toggle { display: grid; margin-left: 8px; flex: 0 0 40px; }
+      .nav-shell > nav > .nav-button { display: inline-flex; min-height: 38px; margin-left: auto; padding-inline: 9px; font-size: 10px; }
+      .mobile-nav { padding-inline: 15px; }
+      .mobile-nav .nav-button { display: none; }
+      .nav-shell .mobile-nav { position: absolute !important; top: calc(100% + 12px); right: 15px; left: auto; width: min(220px, calc(100vw - 30px)) !important; margin: 0 !important; padding: 10px 16px 12px; border: 1px solid var(--line); border-radius: 8px; background: #111113; box-shadow: 0 16px 34px rgba(0,0,0,.42); }
+      .nav-shell.menu-open .mobile-nav { display: flex; flex-direction: column; align-items: stretch; }
+      .nav-shell.menu-open .mobile-nav a { width: 100%; text-align: left; }
       .section { padding: 72px 0; }
       .how-step { padding: 28px 24px 24px; }
       .payment-grid { grid-template-columns: 1fr; }
@@ -973,10 +1012,13 @@
     @media (max-width: 900px) {
       .feature-mosaic { grid-template-columns: repeat(12, minmax(0, 1fr)); }
       .sw-feature-card:nth-child(n) { grid-column: span 12; }
+      .sw-feature-card:nth-child(1), .sw-feature-card:nth-child(2), .sw-feature-card:nth-child(4) { height: auto; min-height: 500px; }
+      .sw-feature-card:nth-child(3) { min-height: 340px; }
       .sw-feature-card:nth-child(1) .sw-feature-inner, .sw-feature-card:nth-child(2) .sw-feature-inner, .sw-feature-card:nth-child(4) .sw-feature-inner { grid-template-columns: 1fr; }
       .sw-feature-copy { max-width: 540px; }
       .sw-feature-visual { min-height: 250px; }
       .sub-feature-visual { min-height: 250px; }
+      .sub-feature-wheel { left: 50%; }
       .sw-editor-feature-card .sw-feature-inner { grid-template-columns: 1fr; }
       .sw-editor-feature-card .sw-feature-visual { min-height: 290px; }
       .fm-native { position: relative; inset: auto; grid-template-columns: 180px 44px minmax(170px, 1fr); max-width: 500px; margin: 0 auto; }
@@ -1125,6 +1167,16 @@
       .button:active, .nav-button:active, .checkout-link:active { transform: scale(.98); }
       .editor-dnd-library-item { cursor: default; }
     }
+    @media (max-width: 900px) {
+      .nav-shell > nav { position: relative; }
+      .nav-shell .nav-links { display: none; }
+      .nav-shell .nav-menu-toggle { display: grid; margin-left: 8px; flex: 0 0 40px; }
+      .nav-shell > nav > .nav-button { display: inline-flex; min-height: 38px; margin-left: auto; padding-inline: 10px; font-size: 11px; }
+      .nav-shell .mobile-nav { position: absolute !important; top: calc(100% + 12px); right: 16px; left: auto; width: 240px !important; margin: 0 !important; padding: 10px 16px 12px; border: 1px solid var(--line); border-radius: 8px; background: #111113; box-shadow: 0 16px 34px rgba(0,0,0,.42); }
+      .nav-shell.menu-open .mobile-nav { display: flex; flex-direction: column; align-items: stretch; }
+      .nav-shell.menu-open .mobile-nav a { width: 100%; text-align: left; }
+      .nav-shell .mobile-nav .nav-button { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -1142,7 +1194,17 @@
         <a href="#contact">Contact</a>
       </div>
       <button class="nav-button" type="button" data-checkout-open>Get Sculpt Wheel</button>
+      <button class="nav-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false"><span></span></button>
     </nav>
+    <div class="mobile-nav wrap" aria-hidden="true">
+      <a href="#workspace">Workspace</a>
+      <a href="#features">Features</a>
+      <a href="#buy">Get it</a>
+      <a href="#how">How it works</a>
+      <a href="#brushes">Brushes</a>
+      <a href="#contact">Contact</a>
+      <button class="nav-button" type="button" data-checkout-open>Get Sculpt Wheel</button>
+    </div>
   </header>
 
   <main id="home">
@@ -1189,9 +1251,9 @@
           <div class="sw-feature-inner">
             <div class="sw-feature-copy"><p class="sw-feature-kicker">Space · point · release</p><h3>Your shortcut. Your brushes. Right there.</h3><p>Hold Space in Sculpt Mode and the wheel opens under your cursor. Move toward a brush and release to select without leaving the viewport.</p></div>
             <div class="sw-feature-visual" aria-hidden="true"><div class="fm-wheel">
-              <span class="fm-ray" style="--a:-90deg"></span><span class="fm-ray" style="--a:-45deg"></span><span class="fm-ray" style="--a:0deg"></span><span class="fm-ray" style="--a:45deg"></span><span class="fm-ray" style="--a:90deg"></span><span class="fm-ray" style="--a:135deg"></span><span class="fm-ray" style="--a:180deg"></span><span class="fm-ray" style="--a:225deg"></span>
+              <span class="fm-ray" style="--a:-90deg;--pulse-delay:0s"></span><span class="fm-ray" style="--a:-45deg;--pulse-delay:0s"></span><span class="fm-ray" style="--a:0deg;--pulse-delay:0s"></span><span class="fm-ray" style="--a:45deg;--pulse-delay:0s"></span><span class="fm-ray" style="--a:90deg;--pulse-delay:0s"></span><span class="fm-ray" style="--a:135deg;--pulse-delay:0s"></span><span class="fm-ray" style="--a:180deg;--pulse-delay:0s"></span><span class="fm-ray" style="--a:225deg;--pulse-delay:0s"></span>
               <span class="fm-center"></span>
-              <span class="fm-brush" style="--a:0deg"><img src="assets/Icon/brush-icons/Standard.webp" alt="" /></span><span class="fm-brush" style="--a:45deg"><img src="assets/Icon/brush-icons/Draw%20Sharp.webp" alt="" /></span><span class="fm-brush active has-sub" style="--a:90deg"><img src="assets/Icon/brush-icons/Move.webp" alt="" /></span><span class="fm-brush" style="--a:135deg"><img src="assets/Icon/brush-icons/Clay.webp" alt="" /></span><span class="fm-brush" style="--a:180deg"><img src="assets/Icon/brush-icons/Clay_Buildup.webp" alt="" /></span><span class="fm-brush" style="--a:225deg"><img src="assets/Icon/brush-icons/Blob.webp" alt="" /></span><span class="fm-brush" style="--a:270deg"><img src="assets/Icon/brush-icons/Inflate.webp" alt="" /></span><span class="fm-brush" style="--a:315deg"><img src="assets/Icon/brush-icons/Crease_Sharp.webp" alt="" /></span>
+              <span class="fm-brush pulse-ring" style="--a:0deg;--pulse-delay:0s"><img src="assets/Icon/brush-icons/Standard.webp" alt="" /></span><span class="fm-brush pulse-glow" style="--a:45deg;--pulse-delay:0s"><img src="assets/Icon/brush-icons/Draw%20Sharp.webp" alt="" /></span><span class="fm-brush active has-sub pulse-soft" style="--a:90deg;--pulse-delay:0s"><img src="assets/Icon/brush-icons/Move.webp" alt="" /></span><span class="fm-brush pulse-ring" style="--a:135deg;--pulse-delay:0s"><img src="assets/Icon/brush-icons/Clay.webp" alt="" /></span><span class="fm-brush pulse-glow" style="--a:180deg;--pulse-delay:0s"><img src="assets/Icon/brush-icons/Clay_Buildup.webp" alt="" /></span><span class="fm-brush pulse-soft" style="--a:225deg;--pulse-delay:0s"><img src="assets/Icon/brush-icons/Blob.webp" alt="" /></span><span class="fm-brush pulse-ring" style="--a:270deg;--pulse-delay:0s"><img src="assets/Icon/brush-icons/Inflate.webp" alt="" /></span><span class="fm-brush pulse-glow" style="--a:315deg;--pulse-delay:0s"><img src="assets/Icon/brush-icons/Crease_Sharp.webp" alt="" /></span>
             </div></div>
           </div>
         </article>
@@ -1200,9 +1262,9 @@
           <div class="sw-feature-inner">
             <div class="sw-feature-copy"><p class="sw-feature-kicker">More options · same slot</p><h3>Keep related brushes together.</h3><p>Group up to three optional variants beneath one main brush and reach specialized tools from the same familiar direction.</p></div>
             <div class="sub-feature-visual" aria-hidden="true"><div class="sub-feature-wheel">
-              <span class="sub-feature-ray" style="--a:-45deg"></span><span class="sub-feature-ray" style="--a:0deg"></span><span class="sub-feature-ray" style="--a:45deg"></span>
+              <span class="sub-feature-ray" style="--a:-45deg;--pulse-delay:0s"></span><span class="sub-feature-ray" style="--a:0deg;--pulse-delay:0s"></span><span class="sub-feature-ray" style="--a:45deg;--pulse-delay:0s"></span>
               <span class="sub-feature-main-brush"><img src="assets/Icon/brush-icons/Move.webp" alt="" /></span>
-              <span class="sub-feature-brush" style="--a:45deg"><img src="assets/Icon/brush-icons/Move_Elastic.webp" alt="" /></span><span class="sub-feature-brush" style="--a:90deg"><img src="assets/Icon/brush-icons/Inflate.webp" alt="" /></span><span class="sub-feature-brush" style="--a:135deg"><img src="assets/Icon/brush-icons/Move_Topo.webp" alt="" /></span>
+              <span class="sub-feature-brush pulse-ring" style="--a:45deg;--pulse-delay:0s"><img src="assets/Icon/brush-icons/Move_Elastic.webp" alt="" /></span><span class="sub-feature-brush pulse-glow" style="--a:90deg;--pulse-delay:0s"><img src="assets/Icon/brush-icons/Inflate.webp" alt="" /></span><span class="sub-feature-brush pulse-soft" style="--a:135deg;--pulse-delay:0s"><img src="assets/Icon/brush-icons/Move_Topo.webp" alt="" /></span>
             </div></div>
           </div>
         </article>
@@ -1995,19 +2057,40 @@
   </script>
   <script>
     (() => {
+      const shell = document.querySelector('.nav-shell');
+      const toggle = document.querySelector('.nav-menu-toggle');
+      const mobileNav = document.querySelector('.mobile-nav');
+      const closeMenu = () => {
+        shell?.classList.remove('menu-open');
+        toggle?.setAttribute('aria-expanded', 'false');
+        toggle?.setAttribute('aria-label', 'Open navigation menu');
+        mobileNav?.setAttribute('aria-hidden', 'true');
+      };
+      toggle?.addEventListener('click', () => {
+        const isOpen = shell.classList.toggle('menu-open');
+        toggle.setAttribute('aria-expanded', String(isOpen));
+        toggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+        mobileNav?.setAttribute('aria-hidden', String(!isOpen));
+      });
+      mobileNav?.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+      window.addEventListener('resize', () => { if (window.innerWidth > 570) closeMenu(); });
+    })();
+  </script>
+  <script>
+    (() => {
       const modal = document.querySelector('[data-checkout-modal]');
-      const openButton = document.querySelector('[data-checkout-open]');
+      const openButtons = document.querySelectorAll('[data-checkout-open]');
       const closeButton = document.querySelector('[data-checkout-close]');
       const closeModal = () => {
         modal.classList.remove('is-open');
         modal.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('checkout-open');
       };
-      openButton?.addEventListener('click', () => {
+      openButtons.forEach((openButton) => openButton.addEventListener('click', () => {
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('checkout-open');
-      });
+      }));
       closeButton?.addEventListener('click', closeModal);
       modal?.addEventListener('click', (event) => {
         if (event.target === modal) closeModal();
